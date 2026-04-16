@@ -1,0 +1,261 @@
+/* ===== MYSPACE VIBES 2006 ===== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #aabbcc;
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 4px,
+    rgba(255,255,255,0.15) 4px,
+    rgba(255,255,255,0.15) 8px
+  );
+  font-family: Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 11px;
+  color: #333333;
+}
+
+a {
+  color: #003399;
+  text-decoration: underline;
+}
+a:hover {
+  color: #ff0066;
+}
+
+/* ===== HEADER / MARQUEE ===== */
+
+#header {
+  background-color: #003399;
+  color: #ffffff;
+  padding: 4px 0;
+  font-size: 11px;
+  font-weight: bold;
+  border-bottom: 3px solid #ff0066;
+}
+
+#header marquee {
+  color: #ffffcc;
+}
+
+/* ===== MAIN WRAPPER ===== */
+
+#wrapper {
+  display: flex;
+  gap: 10px;
+  max-width: 960px;
+  margin: 10px auto;
+  align-items: flex-start;
+}
+
+/* ===== LEFT COLUMN ===== */
+
+#left-col {
+  width: 240px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-pic-box {
+  background-color: #ffffff;
+  border: 2px solid #003399;
+  text-align: center;
+  padding: 8px;
+}
+
+.profile-pic-box img {
+  border: 3px solid #ff0066;
+  display: block;
+  margin: 0 auto 6px;
+}
+
+.online-now {
+  color: #009900;
+  font-weight: bold;
+  font-size: 11px;
+}
+
+.view-pics {
+  margin-top: 4px;
+  font-size: 10px;
+}
+
+.info-box {
+  background-color: #ffffff;
+  border: 2px solid #003399;
+  overflow: hidden;
+}
+
+.info-box-title {
+  background-color: #003399;
+  color: #ffffff;
+  font-weight: bold;
+  padding: 3px 6px;
+  font-size: 11px;
+  border-bottom: 1px solid #0000aa;
+}
+
+.info-box p {
+  padding: 6px 8px;
+  line-height: 1.5;
+}
+
+.details-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+
+.details-table tr {
+  border-bottom: 1px solid #ddddee;
+}
+
+.details-table td {
+  padding: 3px 6px;
+  vertical-align: top;
+}
+
+.details-table td:first-child {
+  white-space: nowrap;
+  color: #003399;
+  width: 80px;
+}
+
+/* ===== FRIENDS GRID ===== */
+
+.friends-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 8px;
+  text-align: center;
+}
+
+.friend img {
+  border: 2px solid #003399;
+  display: block;
+  margin: 0 auto 3px;
+}
+
+.friend div {
+  font-size: 10px;
+  color: #003399;
+  font-weight: bold;
+}
+
+/* ===== RIGHT COLUMN ===== */
+
+#right-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-box {
+  background-color: #ffffff;
+  border: 2px solid #003399;
+  overflow: hidden;
+}
+
+.section-title {
+  background: linear-gradient(to right, #003399, #0055cc);
+  color: #ffffff;
+  font-weight: bold;
+  padding: 4px 8px;
+  font-size: 12px;
+  border-bottom: 2px solid #ff0066;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ===== INTERESTS ===== */
+
+.interests-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.interests-table tr {
+  border-bottom: 1px solid #ddeeff;
+}
+
+.interests-table td {
+  padding: 5px 8px;
+  vertical-align: top;
+  line-height: 1.5;
+}
+
+.interests-table td:first-child {
+  width: 80px;
+  color: #003399;
+  white-space: nowrap;
+}
+
+/* ===== COMMENTS ===== */
+
+.comment {
+  display: flex;
+  gap: 10px;
+  padding: 8px;
+  border-bottom: 1px dashed #aaccee;
+}
+
+.comment-author {
+  text-align: center;
+  width: 60px;
+  flex-shrink: 0;
+  font-size: 10px;
+}
+
+.comment-author img {
+  border: 2px solid #003399;
+  display: block;
+  margin: 0 auto 3px;
+}
+
+.comment-body {
+  flex: 1;
+  line-height: 1.6;
+  font-size: 11px;
+}
+
+.comment-date {
+  font-size: 9px;
+  color: #999999;
+}
+
+.add-comment {
+  padding: 8px;
+  text-align: center;
+  background-color: #eef4ff;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+/* ===== FOOTER ===== */
+
+#footer {
+  background-color: #003399;
+  color: #ccddff;
+  text-align: center;
+  padding: 8px;
+  font-size: 10px;
+  margin-top: 10px;
+  border-top: 3px solid #ff0066;
+}
+
+#footer a {
+  color: #aabbff;
+}
+
+#footer a:hover {
+  color: #ffffff;
+}
