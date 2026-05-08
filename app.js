@@ -1963,7 +1963,7 @@ This is how programs make decisions instead of running every line.`;
 function updateGlitch() {
   if (!glitchEl) return;
   const visible = state.screen === "workspace";
-  const explanation = currentGlitchExplanation();
+  const explanation = glitchState === "thinking" ? currentGlitchExplanation() : "";
   if (!visible && glitchState !== "dormant") {
     glitchState = "dormant";
   }
@@ -2167,7 +2167,7 @@ function render() {
   const hideTopbar = state.focus && state.screen === "workspace";
   app.innerHTML = (hideTopbar ? "" : topbar()) + rewardToast() + screens[state.screen]() + snakeLensSidebar();
   bindAfterRender();
-  updateGlitch();
+  requestAnimationFrame(updateGlitch);
 }
 
 function bindAfterRender() {
