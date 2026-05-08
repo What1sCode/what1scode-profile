@@ -1438,7 +1438,22 @@ body.reduced-motion .glitch--thinking .glitch-fragments rect,
   animation: none;
 }
 
-@media (max-width: 1023px) {
+@media (max-width: 1180px) {
+  .glitch-entity {
+    left: 10px;
+  }
+
+  .glitch-face {
+    width: 84px;
+    height: 84px;
+  }
+
+  .glitch-bubble {
+    width: min(320px, calc(100vw - 120px));
+  }
+}
+
+@media (max-width: 760px) {
   .glitch-entity.glitch--visible {
     display: none;
   }
