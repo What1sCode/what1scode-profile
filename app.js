@@ -1631,10 +1631,12 @@ function safeRestoreState() {
   state.settings.font = Number(state.settings.font);
   if (!Number.isFinite(state.settings.font)) state.settings.font = 1;
   state.settings.font = Math.min(Math.max(state.settings.font, 0.9), 1.25);
+  state.settings.reducedMotion = state.settings.reducedMotion === true;
+  state.settings.highContrast = state.settings.highContrast === true;
   if (!VALID_SCREENS.has(state.screen)) state.screen = "home";
   if (!VALID_PROJECTS.has(state.project)) state.project = "color";
   const maxStep = (lessonData[state.project] || []).length - 1;
-  if (typeof state.step !== "number" || state.step < 0 || state.step > maxStep) {
+  if (typeof state.step !== "number" || !Number.isInteger(state.step) || state.step < 0 || state.step > maxStep) {
     state.step = 0;
   }
   if (!Array.isArray(state.completed)) state.completed = [];
@@ -2759,9 +2761,10 @@ function normalizeCode(code) {
 function stripComments(code) {
   return normalizeCode(code)
     .split("\n")
-    .map(line => line.replace(/#.*$/, "").trim())
-    .filter(Boolean)
-    .join("\n");
+    .map(line => line.replace(/#.*$/, ""))
+    .filter(line => line.trim())
+    .join("\n")
+    .trim();
 }
 
 function hasUnquotedAssignment(code, variableName, allowedValues) {
@@ -2798,7 +2801,7 @@ function rollDie() {
 }
 
 function validateColorShow(code, step) {
-  const clean = normalizeCode(code);
+  const clean = stripComments(code);
   const match = clean.match(/show\s*\(\s*["'](teal|purple|orange|green)["']\s*\)/i);
   if (!match) {
     return {
@@ -2810,6 +2813,7 @@ function validateColorShow(code, step) {
 }
 
 function validateColorAssignment(code, step) {
+  code = stripComments(code);
   const missingQuotes = hasUnquotedAssignment(code, "color", ["teal", "purple", "orange", "green"]);
   if (missingQuotes) {
     return {
@@ -2838,6 +2842,7 @@ function validateColorAssignment(code, step) {
 }
 
 function validateColorShowVariable(code, step) {
+  code = stripComments(code);
   const assignmentResult = validateColorAssignment(code, step);
   if (!assignmentResult.ok) return assignmentResult;
   if (!/show\s*\(\s*color\s*\)/i.test(code)) {
@@ -2850,6 +2855,7 @@ function validateColorShowVariable(code, step) {
 }
 
 function validateColorFinalAssignment(code, step) {
+  code = stripComments(code);
   const assignments = [...code.matchAll(/color\s*=\s*["']([^"']+)["']/gi)];
   if (!assignments.length) {
     return {
@@ -2879,6 +2885,7 @@ function validateColorFinalAssignment(code, step) {
 }
 
 function validateFunctionCall(code, step) {
+  code = stripComments(code);
   const project = state.project;
   const functionName =
     project === "color" ? "flash_color" :
@@ -2909,6 +2916,7 @@ function validateFunctionCall(code, step) {
 }
 
 function validateButtonEvent(code, step) {
+  code = stripComments(code);
   const project = state.project;
   const functionName =
     project === "color" ? "flash_color" :
@@ -2937,6 +2945,7 @@ function validateButtonEvent(code, step) {
 }
 
 function validateRandomColor(code, step) {
+  code = stripComments(code);
   if (!/colors\s*=\s*\[[^\]]+\]/i.test(code)) {
     return {
       ok: false,
@@ -2962,6 +2971,7 @@ function validateRandomColor(code, step) {
 }
 
 function validateDiceRandomNumber(code, step) {
+  code = stripComments(code);
   if (!/roll\s*=\s*random_number\s*\(\s*1\s*,\s*6\s*\)/i.test(code)) {
     return {
       ok: false,
@@ -2976,6 +2986,7 @@ function validateDiceRandomNumber(code, step) {
 }
 
 function validateDiceRollVariable(code, step) {
+  code = stripComments(code);
   if (!/roll\s*=/i.test(code)) {
     return {
       ok: false,
@@ -2986,6 +2997,7 @@ function validateDiceRollVariable(code, step) {
 }
 
 function validateDiceMessage(code, step) {
+  code = stripComments(code);
   if (!/roll\s*=\s*random_number\s*\(\s*1\s*,\s*6\s*\)/i.test(code)) {
     return { ok: false, message: `The roll needs to happen first.\nTry:\nroll = random_number(1, 6)` };
   }
@@ -3000,6 +3012,7 @@ function validateDiceMessage(code, step) {
 }
 
 function validateDiceVisual(code, step) {
+  code = stripComments(code);
   if (!/roll\s*=\s*random_number\s*\(\s*1\s*,\s*6\s*\)/i.test(code)) {
     return { ok: false, message: `The dice face needs a roll value.\nTry:\nroll = random_number(1, 6)` };
   }
@@ -3011,14 +3024,17 @@ function validateDiceVisual(code, step) {
 }
 
 function validateDiceFunction(code, step) {
+  code = stripComments(code);
   return validateFunctionCall(code, step);
 }
 
 function validateDiceButtonEvent(code, step) {
+  code = stripComments(code);
   return validateButtonEvent(code, step);
 }
 
 function validateDiceRepeat(code, step) {
+  code = stripComments(code);
   const buttonResult = validateButtonEvent(code, step);
   if (!buttonResult.ok) return buttonResult;
   const roll = rollDie();
@@ -3026,16 +3042,24 @@ function validateDiceRepeat(code, step) {
 }
 
 function validateReactionFlash(code, step) {
+  code = stripComments(code);
   if (!/wait\s*\(\s*\)/i.test(code)) {
     return { ok: false, message: `Timing issue.\nStart with:\nwait()` };
   }
   if (!/flash\s*\(\s*["']green["']\s*\)/i.test(code)) {
     return { ok: false, message: `Flash issue.\nAfter waiting, flash the screen:\nflash("green")` };
   }
+  const lines = code.split("\n");
+  const waitIndex = lines.findIndex(line => /wait\s*\(\s*\)/i.test(line));
+  const flashIndex = lines.findIndex(line => /flash\s*\(\s*["']green["']\s*\)/i.test(line));
+  if (waitIndex > flashIndex) {
+    return { ok: false, message: `Order issue.\nwait() needs to happen before flash("green").` };
+  }
   return { ok: true, reactionMode: "flash", message: step.runSuccess };
 }
 
 function validateReactionStartTime(code, step) {
+  code = stripComments(code);
   if (!/start_time\s*=\s*now\s*\(\s*\)/i.test(code)) {
     return { ok: false, message: `Time issue.\nStore the start time:\nstart_time = now()` };
   }
@@ -3046,6 +3070,7 @@ function validateReactionStartTime(code, step) {
 }
 
 function validateReactionMeasure(code, step) {
+  code = stripComments(code);
   if (!/start_time\s*=\s*now\s*\(\s*\)/i.test(code)) {
     return { ok: false, message: `Start time is missing.\nAdd:\nstart_time = now()` };
   }
@@ -3059,6 +3084,7 @@ function validateReactionMeasure(code, step) {
 }
 
 function validateReactionState(code, step) {
+  code = stripComments(code);
   if (!/state\s*=\s*["']waiting["']/i.test(code)) {
     return { ok: false, message: `State issue.\nStart in the waiting state:\nstate = "waiting"` };
   }
@@ -3069,6 +3095,7 @@ function validateReactionState(code, step) {
 }
 
 function validateReactionConditional(code, step) {
+  code = stripComments(code);
   if (!/if\s+state\s*==\s*["']waiting["']\s*:/i.test(code)) {
     return { ok: false, message: `Condition issue.\nCheck the waiting state:\nif state == "waiting":` };
   }
@@ -3085,10 +3112,12 @@ function validateReactionConditional(code, step) {
 }
 
 function validateReactionButtonEvent(code, step) {
+  code = stripComments(code);
   return validateButtonEvent(code, step);
 }
 
 function validateReactionComplete(code, step) {
+  code = stripComments(code);
   const requiredChecks = [
     { test: /state\s*=\s*["']waiting["']/i, message: `Start in the waiting state:\nstate = "waiting"` },
     { test: /wait\s*\(\s*\)/i, message: `The timer needs a wait step:\nwait()` },
@@ -3113,6 +3142,7 @@ function getNumericAssignment(code, variableName) {
 }
 
 function validateClickerShowScore(code, step) {
+  code = stripComments(code);
   const score = getNumericAssignment(code, "score");
   if (score === null) {
     return { ok: false, message: `Score issue.\nStore a number first:\nscore = 0` };
@@ -3124,6 +3154,7 @@ function validateClickerShowScore(code, step) {
 }
 
 function validateClickerStoreScore(code, step) {
+  code = stripComments(code);
   const score = getNumericAssignment(code, "score");
   if (score === null) {
     return { ok: false, message: `Variable issue.\nStore the score:\nscore = 0` };
@@ -3136,6 +3167,7 @@ function hasScoreIncrement(code) {
 }
 
 function validateClickerIncrement(code, step) {
+  code = stripComments(code);
   if (!hasScoreIncrement(code)) {
     return { ok: false, message: `Increment issue.\nIncrease score by one:\nscore = score + 1` };
   }
@@ -3146,6 +3178,7 @@ function validateClickerIncrement(code, step) {
 }
 
 function validateClickerFunction(code, step) {
+  code = stripComments(code);
   if (!containsFunctionDef(code, "add_point")) {
     return { ok: false, message: `Function issue.\nDefine the action:\ndef add_point():` };
   }
@@ -3159,6 +3192,7 @@ function validateClickerFunction(code, step) {
 }
 
 function validateClickerButtonEvent(code, step) {
+  code = stripComments(code);
   if (!containsFunctionDef(code, "add_point")) {
     return { ok: false, message: `Function issue.\nDefine add_point() before connecting the button.` };
   }
@@ -3172,6 +3206,7 @@ function validateClickerButtonEvent(code, step) {
 }
 
 function validateClickerComplete(code, step) {
+  code = stripComments(code);
   const checks = [
     { test: /score\s*=\s*0/i, message: `Start the counter:\nscore = 0` },
     { test: /def\s+add_point\s*\(\s*\)\s*:/i, message: `Define the click action:\ndef add_point():` },
@@ -3196,6 +3231,7 @@ function hasMovesList(code) {
 }
 
 function validateRpsPlayerChoice(code, step) {
+  code = stripComments(code);
   const player = getMoveAssignment(code, "player");
   if (!player) {
     return { ok: false, message: `Choice issue.\nStore one supported move:\nplayer = "rock"` };
@@ -3207,6 +3243,7 @@ function validateRpsPlayerChoice(code, step) {
 }
 
 function validateRpsRandomChoice(code, step) {
+  code = stripComments(code);
   if (!hasMovesList(code)) {
     return { ok: false, message: `List issue.\nStore all three moves:\nmoves = ["rock", "paper", "scissors"]` };
   }
@@ -3222,6 +3259,7 @@ function validateRpsRandomChoice(code, step) {
 }
 
 function validateRpsShowBoth(code, step) {
+  code = stripComments(code);
   const player = getMoveAssignment(code, "player");
   if (!player) return { ok: false, message: `Player choice is missing.\nAdd:\nplayer = "rock"` };
   const computerResult = validateRpsRandomChoice(code, step);
@@ -3233,6 +3271,7 @@ function validateRpsShowBoth(code, step) {
 }
 
 function validateRpsTieCondition(code, step) {
+  code = stripComments(code);
   if (!/if\s+player\s*==\s*computer\s*:/i.test(code)) {
     return { ok: false, message: `Condition issue.\nCheck for matching choices:\nif player == computer:` };
   }
@@ -3246,6 +3285,7 @@ function validateRpsTieCondition(code, step) {
 }
 
 function validateRpsWinCondition(code, step) {
+  code = stripComments(code);
   if (!/if\s+player\s*==\s*["']rock["']\s+and\s+computer\s*==\s*["']scissors["']\s*:/i.test(code)) {
     return { ok: false, message: `Win condition issue.\nCheck rock against scissors:\nif player == "rock" and computer == "scissors":` };
   }
@@ -3259,6 +3299,7 @@ function validateRpsWinCondition(code, step) {
 }
 
 function validateRpsComplete(code, step) {
+  code = stripComments(code);
   const checks = [
     { test: /player\s*=\s*["'](rock|paper|scissors)["']/i, message: `Store the player move:\nplayer = "rock"` },
     { test: /moves\s*=\s*\[[^\]]*["']rock["'][^\]]*["']paper["'][^\]]*["']scissors["'][^\]]*\]/i, message: `Store the move list:\nmoves = ["rock", "paper", "scissors"]` },
