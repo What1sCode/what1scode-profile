@@ -1273,34 +1273,140 @@ body.reduced-motion .snake-lens-sidebar {
 }
 
 .glitch-entity {
-  position: fixed;
-  top: 50%;
-  left: 20px;
-  z-index: 50;
+  position: absolute;
+  z-index: 30;
   display: none;
-  align-items: center;
-  gap: 14px;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%);
 }
 
 .glitch-entity.glitch--visible {
-  display: flex;
+  display: block;
 }
 
 .glitch-face {
   display: grid;
-  width: 112px;
-  height: 112px;
+  width: clamp(190px, 13vw, 260px);
+  height: clamp(190px, 13vw, 260px);
   place-items: center;
-  border: 1px solid var(--line);
-  background: rgba(17, 20, 27, 0.82);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   padding: 0;
-  box-shadow: 0 0 26px rgba(0, 200, 160, 0.10);
+  box-shadow: none;
+  overflow: visible;
+  position: relative;
+}
+
+.glitch--dormant .glitch-face {
+  opacity: 0.55;
+  filter: saturate(0.7) contrast(0.85);
+}
+
+.glitch--aware .glitch-face,
+.glitch--thinking .glitch-face {
+  opacity: 1;
+  filter: none;
+}
+
+.glitch-avatar-stack {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.glitch-avatar {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+.glitch-avatar-main {
+  opacity: 1;
+}
+
+.glitch-avatar-cyan,
+.glitch-avatar-pink {
+  opacity: 0;
+  mix-blend-mode: screen;
+}
+
+.glitch-avatar-cyan {
+  transform: translateX(-2px);
+  filter: saturate(1.5) hue-rotate(120deg) brightness(1.08);
+}
+
+.glitch-avatar-pink {
+  transform: translateX(2px);
+  filter: saturate(1.8) hue-rotate(285deg) brightness(1.08);
+}
+
+.glitch--aware .glitch-avatar-cyan,
+.glitch--aware .glitch-avatar-pink {
+  opacity: 0.18;
+}
+
+.glitch--thinking .glitch-avatar-cyan,
+.glitch--thinking .glitch-avatar-pink {
+  opacity: 0.34;
+}
+
+.glitch--thinking .glitch-avatar-stack {
+  animation: glitchAvatarSlice 180ms steps(2, end) 1;
+}
+
+.glitch-particles {
+  position: absolute;
+  inset: -12px;
+  pointer-events: none;
+}
+
+.glitch-particles span {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  --particle-opacity: 0.32;
+  background: var(--accent);
+  opacity: 0;
+  box-shadow: 0 0 12px rgba(0, 200, 160, 0.48);
+  animation: glitchParticleIdle 2600ms steps(2, end) infinite;
+}
+
+.glitch-particles span:nth-child(1) { top: 14%; left: 18%; animation-delay: 0ms; }
+.glitch-particles span:nth-child(2) { top: 24%; right: 16%; width: 9px; animation-delay: 420ms; }
+.glitch-particles span:nth-child(3) { top: 38%; left: 8%; height: 10px; animation-delay: 900ms; }
+.glitch-particles span:nth-child(4) { top: 48%; right: 8%; animation-delay: 1240ms; }
+.glitch-particles span:nth-child(5) { bottom: 22%; left: 18%; width: 12px; height: 3px; animation-delay: 1560ms; }
+.glitch-particles span:nth-child(6) { bottom: 14%; right: 22%; animation-delay: 1980ms; }
+.glitch-particles span:nth-child(7) { top: 10%; right: 34%; width: 4px; height: 12px; animation-delay: 2300ms; }
+.glitch-particles span:nth-child(8) { bottom: 35%; left: 4%; animation-delay: 2700ms; }
+.glitch-particles span:nth-child(9) { top: 63%; right: 12%; width: 11px; height: 4px; animation-delay: 3100ms; }
+.glitch-particles span:nth-child(10) { bottom: 6%; left: 42%; animation-delay: 3500ms; }
+.glitch-particles span:nth-child(11) { top: 32%; right: 2%; height: 9px; animation-delay: 3900ms; }
+.glitch-particles span:nth-child(12) { top: 72%; left: 11%; animation-delay: 4300ms; }
+
+.glitch--aware .glitch-particles span,
+.glitch--thinking .glitch-particles span {
+  --particle-opacity: 0.72;
+  animation-duration: 1150ms;
+  box-shadow: 0 0 16px rgba(0, 200, 160, 0.7);
+}
+
+.glitch--aware .glitch-particles span:nth-child(n + 7),
+.glitch--thinking .glitch-particles span:nth-child(n + 7) {
+  background: #FF2D78;
+  box-shadow: 0 0 18px rgba(255, 45, 120, 0.46);
 }
 
 .glitch-svg {
   width: 100%;
   height: 100%;
+  display: block;
 }
 
 .glitch-face-surface {
@@ -1376,15 +1482,31 @@ body.reduced-motion .snake-lens-sidebar {
 
 .glitch-bubble {
   display: none;
-  position: relative;
-  width: min(360px, calc(100vw - 180px));
+  position: absolute;
+  top: calc(100% - 18px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(390px, calc(100vw - 32px));
   max-height: 240px;
-  overflow-y: auto;
+  overflow: visible;
   border: 1px solid var(--line);
   background: rgba(17, 20, 27, 0.97);
   color: var(--text);
   padding: 16px 38px 16px 16px;
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.36);
+}
+
+.glitch-bubble::before {
+  content: "";
+  position: absolute;
+  top: -13px;
+  left: calc(50% - 18px);
+  width: 24px;
+  height: 24px;
+  border-left: 1px solid var(--line);
+  border-top: 1px solid var(--line);
+  background: rgba(17, 20, 27, 0.97);
+  transform: rotate(45deg);
 }
 
 .glitch--thinking .glitch-bubble {
@@ -1407,6 +1529,8 @@ body.reduced-motion .snake-lens-sidebar {
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-size: 0.82rem;
   line-height: 1.55;
+  max-height: 208px;
+  overflow-y: auto;
   white-space: pre-line;
 }
 
@@ -1420,6 +1544,19 @@ body.reduced-motion .snake-lens-sidebar {
   0% { transform: translateX(0); }
   50% { transform: translateX(7px); }
   100% { transform: translateX(0); }
+}
+
+@keyframes glitchAvatarSlice {
+  0% { clip-path: inset(0 0 0 0); transform: translateX(0); }
+  35% { clip-path: inset(18% 0 56% 0); transform: translateX(4px); }
+  70% { clip-path: inset(58% 0 18% 0); transform: translateX(-3px); }
+  100% { clip-path: inset(0 0 0 0); transform: translateX(0); }
+}
+
+@keyframes glitchParticleIdle {
+  0%, 62%, 100% { opacity: 0; transform: translate(0, 0) scale(0.7); }
+  66% { opacity: var(--particle-opacity); transform: translate(3px, -2px) scale(1); }
+  70% { opacity: 0; transform: translate(-2px, 1px) scale(0.8); }
 }
 
 body.reduced-motion .glitch--thinking .glitch-fragments,
@@ -1438,16 +1575,18 @@ body.reduced-motion .glitch--thinking .glitch-fragments rect,
   animation: none;
 }
 
+body.reduced-motion .glitch--thinking .glitch-avatar-stack,
+.glitch--reduced-motion.glitch--thinking .glitch-avatar-stack {
+  animation: none;
+}
+
+body.reduced-motion .glitch-particles span,
+.glitch--reduced-motion .glitch-particles span {
+  animation: none;
+  opacity: 0;
+}
+
 @media (max-width: 1180px) {
-  .glitch-entity {
-    left: 10px;
-  }
-
-  .glitch-face {
-    width: 84px;
-    height: 84px;
-  }
-
   .glitch-bubble {
     width: min(320px, calc(100vw - 120px));
   }
