@@ -1271,3 +1271,175 @@ body.reduced-motion .snake-lens-sidebar {
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   color: var(--text);
 }
+
+.glitch-entity {
+  position: fixed;
+  top: 50%;
+  left: 20px;
+  z-index: 50;
+  display: none;
+  align-items: center;
+  gap: 14px;
+  transform: translateY(-50%);
+}
+
+.glitch-entity.glitch--visible {
+  display: flex;
+}
+
+.glitch-face {
+  display: grid;
+  width: 112px;
+  height: 112px;
+  place-items: center;
+  border: 1px solid var(--line);
+  background: rgba(17, 20, 27, 0.82);
+  padding: 0;
+  box-shadow: 0 0 26px rgba(0, 200, 160, 0.10);
+}
+
+.glitch-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.glitch-face-surface {
+  fill: var(--panel-3);
+}
+
+.glitch-chroma {
+  opacity: 0;
+  mix-blend-mode: screen;
+  transition: opacity 160ms ease;
+}
+
+.glitch-chroma-cyan {
+  fill: var(--accent);
+  opacity: 0.3;
+  transform: translateX(-4px);
+}
+
+.glitch-chroma-pink {
+  fill: #FF2D78;
+  opacity: 0.3;
+  transform: translateX(4px);
+}
+
+.glitch-eye {
+  fill: var(--accent);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: height 140ms ease, y 140ms ease;
+}
+
+.glitch--aware .glitch-eye,
+.glitch--thinking .glitch-eye {
+  height: 15px;
+  y: 47px;
+}
+
+.glitch--aware .glitch-chroma,
+.glitch--thinking .glitch-chroma {
+  opacity: 1;
+}
+
+.glitch-fragments,
+.glitch-slices {
+  opacity: 0;
+}
+
+.glitch-fragments rect {
+  fill: var(--accent);
+  opacity: 0.45;
+}
+
+.glitch-fragments rect:nth-child(2n) {
+  opacity: 0.24;
+}
+
+.glitch--thinking .glitch-fragments {
+  opacity: 1;
+}
+
+.glitch--thinking .glitch-fragments rect {
+  animation: glitchFragmentPulse 420ms ease-in-out 2;
+}
+
+.glitch-slices rect {
+  fill: rgba(0, 200, 160, 0.18);
+}
+
+.glitch--thinking .glitch-slices {
+  opacity: 1;
+  animation: glitchSliceShift 120ms steps(2, end) 2;
+}
+
+.glitch-bubble {
+  display: none;
+  position: relative;
+  width: min(360px, calc(100vw - 180px));
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  background: rgba(17, 20, 27, 0.97);
+  color: var(--text);
+  padding: 16px 38px 16px 16px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.36);
+}
+
+.glitch--thinking .glitch-bubble {
+  display: block;
+}
+
+.glitch-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  min-width: 26px;
+  min-height: 26px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+.glitch-bubble-copy {
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
+@keyframes glitchFragmentPulse {
+  0% { opacity: 0.12; transform: translate(0, 0); }
+  45% { opacity: 0.7; transform: translate(3px, -2px); }
+  100% { opacity: 0.28; transform: translate(-2px, 1px); }
+}
+
+@keyframes glitchSliceShift {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(7px); }
+  100% { transform: translateX(0); }
+}
+
+body.reduced-motion .glitch--thinking .glitch-fragments,
+.glitch--reduced-motion.glitch--thinking .glitch-fragments {
+  display: none;
+}
+
+body.reduced-motion .glitch--thinking .glitch-slices,
+.glitch--reduced-motion.glitch--thinking .glitch-slices {
+  display: none;
+  animation: none;
+}
+
+body.reduced-motion .glitch--thinking .glitch-fragments rect,
+.glitch--reduced-motion.glitch--thinking .glitch-fragments rect {
+  animation: none;
+}
+
+@media (max-width: 1023px) {
+  .glitch-entity.glitch--visible {
+    display: none;
+  }
+}

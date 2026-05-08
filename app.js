@@ -1632,6 +1632,25 @@ const LENS_AXIS_CAPTIONS = {
   "rps-complete": "Every possible outcome needs its own branch."
 };
 
+const GLITCH_TOKENS = {
+  "button-event": { event: "a button click", binding: "button.on_click(flash_color)", fn: "flash_color" },
+  "function-call": { event: "a function call", binding: "flash_color()", fn: "flash_color" },
+  "random-color": { event: "a function call", binding: "flash_color()", fn: "flash_color" },
+  "dice-function": { event: "roll() called", binding: "def roll():", fn: "roll" },
+  "dice-button-event": { event: "a button click", binding: "button.on_click(roll)", fn: "roll" },
+  "dice-repeat": { event: "repeat(10) fires", binding: "repeat(10, roll)", fn: "roll" },
+  "reaction-flash": { event: "wait() completes", binding: "wait() → flash('green')", fn: "the flash sequence" },
+  "reaction-button-event": { event: "a button click", binding: "button.on_click(record_click)", fn: "record_click" },
+  "clicker-function": { event: "add_point() called", binding: "def add_point():", fn: "add_point" },
+  "clicker-button-event": { event: "a button click", binding: "button.on_click(add_point)", fn: "add_point" },
+  "reaction-state": { condition: "state = 'waiting' then state = 'ready'" },
+  "reaction-conditional": { condition: "if state == 'waiting' / if state == 'ready'" },
+  "reaction-complete": { condition: "if state == 'ready': record reaction time" },
+  "rps-tie-condition": { condition: "if player == computer" },
+  "rps-win-condition": { condition: "if player beats computer" },
+  "rps-complete": { condition: "if tie / if win / else lose" }
+};
+
 function getLessonAxis(validationMode) {
   return LESSON_AXIS[validationMode] || "result";
 }
@@ -1807,6 +1826,161 @@ function safeRestoreState() {
 safeRestoreState();
 
 const app = document.querySelector("#app");
+let glitchState = "dormant";
+let glitchEl = null;
+
+function glitchSvgMarkup() {
+  return `
+    <svg class="glitch-svg" viewBox="0 0 120 120" aria-hidden="true" focusable="false">
+      <defs>
+        <clipPath id="glitchFaceClip">
+          <polygon points="36 18 84 18 101 39 94 88 72 104 42 100 22 80 20 40" />
+        </clipPath>
+      </defs>
+      <g class="glitch-chroma">
+        <polygon class="glitch-chroma-cyan" points="36 18 84 18 101 39 94 88 72 104 42 100 22 80 20 40" />
+        <polygon class="glitch-chroma-pink" points="36 18 84 18 101 39 94 88 72 104 42 100 22 80 20 40" />
+      </g>
+      <polygon class="glitch-face-surface" points="36 18 84 18 101 39 94 88 72 104 42 100 22 80 20 40" />
+      <g class="glitch-slices" clip-path="url(#glitchFaceClip)">
+        <rect x="21" y="36" width="78" height="7" />
+        <rect x="18" y="56" width="84" height="6" />
+        <rect x="28" y="76" width="65" height="5" />
+      </g>
+      <g class="glitch-eyes">
+        <rect class="glitch-eye" x="40" y="52" width="16" height="4" />
+        <rect class="glitch-eye" x="68" y="52" width="16" height="4" />
+      </g>
+      <g class="glitch-fragments">
+        <rect x="22" y="22" width="8" height="5" />
+        <rect x="92" y="30" width="12" height="4" />
+        <rect x="16" y="50" width="6" height="14" />
+        <rect x="100" y="55" width="10" height="6" />
+        <rect x="27" y="91" width="12" height="5" />
+        <rect x="81" y="96" width="7" height="12" />
+        <rect x="34" y="12" width="14" height="4" />
+        <rect x="96" y="82" width="5" height="13" />
+        <rect x="12" y="78" width="9" height="6" />
+        <rect x="72" y="13" width="6" height="10" />
+      </g>
+    </svg>
+  `;
+}
+
+function initGlitch() {
+  if (glitchEl) return;
+  glitchEl = document.createElement("div");
+  glitchEl.className = "glitch-entity glitch--dormant";
+  glitchEl.innerHTML = `
+    <button type="button" class="glitch-face" aria-label="Ask The Glitch for a linear explanation">
+      ${glitchSvgMarkup()}
+    </button>
+    <section class="glitch-bubble" aria-label="The Glitch explanation">
+      <button type="button" class="glitch-close" aria-label="Close The Glitch explanation">×</button>
+      <div class="glitch-bubble-copy"></div>
+    </section>
+  `;
+  document.body.appendChild(glitchEl);
+
+  glitchEl.addEventListener("mouseenter", () => {
+    if (glitchState !== "thinking") setGlitchState("aware");
+  });
+  glitchEl.addEventListener("mouseleave", () => {
+    if (glitchState === "aware") setGlitchState("dormant");
+  });
+  glitchEl.querySelector(".glitch-face").addEventListener("click", (event) => {
+    event.stopPropagation();
+    if (glitchState === "thinking") {
+      setGlitchState("dormant");
+      return;
+    }
+    if (currentGlitchExplanation()) {
+      setGlitchState("thinking");
+      return;
+    }
+    setGlitchState("aware");
+  });
+  glitchEl.querySelector(".glitch-close").addEventListener("click", (event) => {
+    event.stopPropagation();
+    setGlitchState("dormant");
+  });
+  document.addEventListener("click", (event) => {
+    if (glitchState === "thinking" && glitchEl && !glitchEl.contains(event.target)) {
+      setGlitchState("dormant");
+    }
+  });
+}
+
+function setGlitchState(nextState) {
+  glitchState = nextState;
+  updateGlitch();
+}
+
+function currentGlitchExplanation() {
+  const step = currentLessonStep();
+  if (state.screen !== "workspace" || !step) return "";
+  const axis = getLessonAxis(step.validationMode);
+  const tokens = GLITCH_TOKENS[step.validationMode];
+  if (axis === "cause" && tokens) {
+    return `This step is about what causes code to run.
+
+The program does not run continuously.
+It waits until something triggers it.
+
+In this step, the trigger is:
+${tokens.event}
+
+The line:
+${tokens.binding}
+
+connects that trigger to a function.
+
+When the trigger occurs, the function:
+${tokens.fn}
+
+runs.
+
+This step does not change what the function does.
+It changes when the function runs.`;
+  }
+  if (axis === "control" && tokens) {
+    return `This step is about how the program chooses what to do.
+
+The same input can lead to different behavior.
+That choice depends on conditions.
+
+The program checks:
+${tokens.condition}
+
+Only the code inside the matching condition runs.
+Other paths are skipped.
+
+This is how programs make decisions instead of running every line.`;
+  }
+  return "";
+}
+
+function updateGlitch() {
+  if (!glitchEl) return;
+  const visible = state.screen === "workspace";
+  const explanation = currentGlitchExplanation();
+  if (!visible && glitchState !== "dormant") {
+    glitchState = "dormant";
+  }
+  glitchEl.className = [
+    "glitch-entity",
+    visible ? "glitch--visible" : "",
+    state.settings.reducedMotion ? "glitch--reduced-motion" : "",
+    `glitch--${glitchState}`
+  ].filter(Boolean).join(" ");
+  const copy = glitchEl.querySelector(".glitch-bubble-copy");
+  if (copy) copy.textContent = explanation;
+  const face = glitchEl.querySelector(".glitch-face");
+  if (face) {
+    face.setAttribute("aria-expanded", glitchState === "thinking" ? "true" : "false");
+    face.disabled = !visible;
+  }
+}
 
 function save() {
   localStorage.setItem("glitchWorksState", JSON.stringify({
@@ -1993,6 +2167,7 @@ function render() {
   const hideTopbar = state.focus && state.screen === "workspace";
   app.innerHTML = (hideTopbar ? "" : topbar()) + rewardToast() + screens[state.screen]() + snakeLensSidebar();
   bindAfterRender();
+  updateGlitch();
 }
 
 function bindAfterRender() {
@@ -4219,9 +4394,14 @@ window.hideReward = hideReward;
 window.unlockLevel = unlockLevel;
 window.initSnakeLens = initSnakeLens;
 
+initGlitch();
+
 if (!state.code[state.project]) loadStepCode();
 
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && glitchState === "thinking") {
+    setGlitchState("dormant");
+  }
   if (event.key === "Escape" && state.focus) {
     state.focus = false;
     save();
