@@ -1913,7 +1913,7 @@ function initGlitch() {
 
 function setGlitchState(nextState) {
   glitchState = nextState;
-  updateGlitch();
+  applyGlitchState();
 }
 
 function currentGlitchExplanation() {
@@ -1960,13 +1960,10 @@ This is how programs make decisions instead of running every line.`;
   return "";
 }
 
-function updateGlitch() {
+function applyGlitchState() {
   if (!glitchEl) return;
   const visible = state.screen === "workspace";
   const explanation = glitchState === "thinking" ? currentGlitchExplanation() : "";
-  if (!visible && glitchState !== "dormant") {
-    glitchState = "dormant";
-  }
   glitchEl.className = [
     "glitch-entity",
     visible ? "glitch--visible" : "",
@@ -1980,6 +1977,10 @@ function updateGlitch() {
     face.setAttribute("aria-expanded", glitchState === "thinking" ? "true" : "false");
     face.disabled = !visible;
   }
+}
+
+function updateGlitch() {
+  applyGlitchState();
 }
 
 function save() {
@@ -2008,6 +2009,7 @@ function setScreen(screen) {
   state.log = "Output waiting.";
   save();
   render();
+  requestAnimationFrame(updateGlitch);
 }
 
 function setProject(id) {
@@ -2167,7 +2169,6 @@ function render() {
   const hideTopbar = state.focus && state.screen === "workspace";
   app.innerHTML = (hideTopbar ? "" : topbar()) + rewardToast() + screens[state.screen]() + snakeLensSidebar();
   bindAfterRender();
-  requestAnimationFrame(updateGlitch);
 }
 
 function bindAfterRender() {
