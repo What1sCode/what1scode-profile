@@ -1917,12 +1917,13 @@ function setGlitchState(nextState) {
 }
 
 function currentGlitchExplanation() {
-  const step = currentLessonStep();
-  if (state.screen !== "workspace" || !step) return "";
-  const axis = getLessonAxis(step.validationMode);
-  const tokens = GLITCH_TOKENS[step.validationMode];
-  if (axis === "cause" && tokens) {
-    return `This step is about what causes code to run.
+  try {
+    const step = currentLessonStep();
+    if (state.screen !== "workspace" || !step) return "";
+    const axis = getLessonAxis(step.validationMode);
+    const tokens = GLITCH_TOKENS[step.validationMode];
+    if (axis === "cause" && tokens) {
+      return `This step is about what causes code to run.
 
 The program does not run continuously.
 It waits until something triggers it.
@@ -1942,9 +1943,9 @@ runs.
 
 This step does not change what the function does.
 It changes when the function runs.`;
-  }
-  if (axis === "control" && tokens) {
-    return `This step is about how the program chooses what to do.
+    }
+    if (axis === "control" && tokens) {
+      return `This step is about how the program chooses what to do.
 
 The same input can lead to different behavior.
 That choice depends on conditions.
@@ -1956,8 +1957,11 @@ Only the code inside the matching condition runs.
 Other paths are skipped.
 
 This is how programs make decisions instead of running every line.`;
+    }
+    return "";
+  } catch (error) {
+    return "";
   }
-  return "";
 }
 
 function applyGlitchState() {
@@ -4411,3 +4415,4 @@ document.addEventListener("keydown", (event) => {
 });
 
 render();
+requestAnimationFrame(updateGlitch);
