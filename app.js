@@ -1483,6 +1483,159 @@ const SYSTEM_CAPABILITIES = {
   }
 };
 
+const LESSON_AXIS = {
+  "function-call": "cause",
+  "button-event": "cause",
+  "random-color": "cause",
+  "dice-function": "cause",
+  "dice-button-event": "cause",
+  "dice-repeat": "cause",
+  "reaction-flash": "cause",
+  "reaction-button-event": "cause",
+  "clicker-function": "cause",
+  "clicker-button-event": "cause",
+  "reaction-state": "control",
+  "reaction-conditional": "control",
+  "reaction-complete": "control",
+  "rps-tie-condition": "control",
+  "rps-win-condition": "control",
+  "rps-complete": "control",
+  "color-show-variable": "state",
+  "color-final-assignment": "state",
+  "dice-roll-variable": "state",
+  "dice-message": "state",
+  "reaction-start-time": "state",
+  "reaction-measure": "state",
+  "clicker-show-score": "state",
+  "clicker-store-score": "state",
+  "clicker-increment": "state",
+  "rps-player-choice": "state",
+  "rps-random-choice": "state",
+  "rps-show-both": "state"
+};
+
+const AXIS_TRACE_BY_MODE = {
+  "button-event": {
+    trigger: "button click",
+    logic: "button.on_click(flash_color)",
+    result: "flash_color() ran",
+    why: "Event-driven code waits for a trigger before running"
+  },
+  "function-call": {
+    trigger: "function called by name",
+    logic: "flash_color() in the code body",
+    result: "flash_color() ran immediately",
+    why: "Calling a function by name transfers control to it"
+  },
+  "dice-function": {
+    trigger: "roll() called",
+    logic: "def roll(): wraps the random logic",
+    result: "roll() ran, die face updated",
+    why: "Functions package logic so it can be triggered on demand"
+  },
+  "dice-button-event": {
+    trigger: "button click",
+    logic: "button.on_click(roll)",
+    result: "roll() ran",
+    why: "The button is the trigger; the function is the response"
+  },
+  "dice-repeat": {
+    trigger: "repeat(10) fires",
+    logic: "repeat(10, roll)",
+    result: "roll() ran 10 times",
+    why: "Repetition is a trigger that fires a function multiple times"
+  },
+  "reaction-flash": {
+    trigger: "wait() completes",
+    logic: "wait() → flash('green')",
+    result: "flash('green') ran after delay",
+    why: "A timer is a trigger — code waits before responding"
+  },
+  "reaction-button-event": {
+    trigger: "button click",
+    logic: "button.on_click(record_click)",
+    result: "record_click() ran",
+    why: "The click is the trigger; the handler is the response"
+  },
+  "clicker-function": {
+    trigger: "add_point() called",
+    logic: "def add_point(): score += 1",
+    result: "add_point() ran, score updated",
+    why: "Functions are named triggers for reusable logic"
+  },
+  "clicker-button-event": {
+    trigger: "button click",
+    logic: "button.on_click(add_point)",
+    result: "add_point() ran",
+    why: "Binding connects the trigger to the function"
+  },
+  "random-color": {
+    trigger: "function called",
+    logic: "flash_color() picks random color",
+    result: "flash_color() ran with new color",
+    why: "Functions trigger randomness on demand"
+  },
+  "reaction-state": {
+    trigger: "run executed",
+    logic: "state = 'waiting' then state = 'ready'",
+    result: "state variable controls what happens next",
+    why: "State determines which branch runs on the next input"
+  },
+  "reaction-conditional": {
+    trigger: "button click",
+    logic: "if state == 'waiting' / if state == 'ready'",
+    result: "one branch ran based on current state",
+    why: "Conditions select behavior — same input, different outcome"
+  },
+  "reaction-complete": {
+    trigger: "button click",
+    logic: "if state == 'ready': record reaction time",
+    result: "reaction time branch ran",
+    why: "Control flow routes input to the correct handler"
+  },
+  "rps-tie-condition": {
+    trigger: "player and computer choices compared",
+    logic: "if player == computer: result = 'tie'",
+    result: "tie branch ran",
+    why: "Conditions check equality and choose a path"
+  },
+  "rps-win-condition": {
+    trigger: "choices compared",
+    logic: "if player beats computer: result = 'player wins'",
+    result: "win branch ran",
+    why: "Conditions route to different outcomes based on values"
+  },
+  "rps-complete": {
+    trigger: "choices compared",
+    logic: "if tie / if win / else lose",
+    result: "one of three branches ran",
+    why: "Full control flow covers every possible path"
+  }
+};
+
+const LENS_AXIS_CAPTIONS = {
+  "function-call": "Calling a function by name transfers control to it.",
+  "button-event": "A button click is a trigger. Code waits until it fires.",
+  "random-color": "The trigger runs logic that picks a fresh value.",
+  "dice-function": "A named function packages the roll so it can run on demand.",
+  "dice-button-event": "The button is the trigger. The roll function is the response.",
+  "dice-repeat": "A repeating trigger runs the same response multiple times.",
+  "reaction-flash": "A timer can trigger code after a pause.",
+  "reaction-button-event": "The click triggers the handler that records input.",
+  "clicker-function": "Calling the function runs the score update.",
+  "clicker-button-event": "The button trigger connects directly to score logic.",
+  "reaction-state": "State decides what the next input means.",
+  "reaction-conditional": "Same input. Different state. Different branch runs.",
+  "reaction-complete": "Control flow routes the click to the ready branch.",
+  "rps-tie-condition": "A condition checks whether two values match.",
+  "rps-win-condition": "A condition chooses the winning branch.",
+  "rps-complete": "Every possible outcome needs its own branch."
+};
+
+function getLessonAxis(validationMode) {
+  return LESSON_AXIS[validationMode] || "result";
+}
+
 Object.entries(SNAKE_LENS_BY_MODE).forEach(([mode, lens]) => {
   lens.demoType = SNAKE_LENS_DEMO_TYPES[mode] || "redraw";
   lens.highlightLine = SNAKE_LENS_HIGHLIGHT_LINES[mode] || "";
@@ -1676,6 +1829,7 @@ function save() {
 }
 
 function setScreen(screen) {
+  clearLensCaptionTimer();
   state.screen = VALID_SCREENS.has(screen) ? screen : "home";
   state.log = "Output waiting.";
   save();
@@ -2277,7 +2431,7 @@ function outputTrace() {
       value: item
     }))
     : [
-      { label: "Input / Trigger", value: trace.input },
+      { label: trace.trigger ? "Trigger" : "Input / Trigger", value: trace.trigger || trace.input },
       { label: "Rule / Logic", value: trace.logic },
       { label: "Result", value: trace.result },
       { label: "Why it matters", value: trace.why }
@@ -2299,6 +2453,18 @@ function outputTrace() {
       </ul>
     </div>
   `;
+}
+
+function applyAxisTrace(step) {
+  const axis = getLessonAxis(step?.validationMode);
+  const trace = AXIS_TRACE_BY_MODE[step?.validationMode];
+  if ((axis !== "cause" && axis !== "control") || !trace || !state.outputResult) {
+    return;
+  }
+  state.outputResult = {
+    ...state.outputResult,
+    trace
+  };
 }
 
 function button({ label, className = "secondary", onClick = "", disabled = false, title = "" }) {
@@ -2432,21 +2598,28 @@ function snakeLensSidebar() {
   if (!state.stepStatus.success || !lens) {
     return "";
   }
+  const axis = getLessonAxis(step.validationMode);
+  const axisClass = axis === "cause" ? "lens--cause" : axis === "control" ? "lens--control" : "";
+  const axisLabel = axis === "cause" ? "TRIGGER → RESPONSE" : axis === "control" ? "IF → THEN / ELSE" : "";
   const demoType = lens.demoType || "redraw";
   const caption = SNAKE_LENS_CAPTIONS[demoType] || "This is the exact moment your code runs in Snake.";
+  const phaseOneCaption = LENS_AXIS_CAPTIONS[step.validationMode];
+  const elapsedCaptionTime = lensCaptionMode === step.validationMode ? Date.now() - lensCaptionStartedAt : 0;
+  const shownCaption = phaseOneCaption && !state.settings.reducedMotion && elapsedCaptionTime < 2800 ? phaseOneCaption : caption;
 
   return `
-    <div class="snake-lens-sidebar" role="region" aria-label="Game system">
+    <div class="snake-lens-sidebar ${axisClass}" role="region" aria-label="Game system">
       <p class="eyebrow">Game System — ${escapeHtml(lens.systemName)}</p>
       <div class="snake-lens-split">
         <div class="lens-code">
           <p class="lens-code-label">Inside Snake</p>
           <pre>${renderLensCode(lens.snakeSnippet, lens.highlightLine)}</pre>
         </div>
-        <div class="lens-demo">
+        <div class="lens-demo snake-lens-demo">
           <div class="lens-snake-grid" id="lens-snake-grid" data-demo-type="${escapeAttribute(demoType)}"></div>
           ${demoType === "score" ? `<div class="lens-score-counter" aria-label="Mini Snake score">Score: <span>0</span></div>` : ""}
-          <p class="lens-caption">${escapeHtml(caption)}</p>
+          ${axisLabel ? `<div class="lens-axis-label">${escapeHtml(axisLabel)}</div>` : ""}
+          <p class="lens-caption" data-phase-two-caption="${escapeAttribute(caption)}" data-has-caption-cycle="${phaseOneCaption && !state.settings.reducedMotion ? "true" : "false"}">${escapeHtml(shownCaption)}</p>
         </div>
       </div>
       <p class="lens-explanation">${escapeHtml(lens.explanation)}</p>
@@ -2460,9 +2633,34 @@ function initSnakeLens() {
     clearInterval(window._snakeDemoInterval);
     window._snakeDemoInterval = null;
   }
+  clearLensCaptionTimer(false);
   const grid = document.querySelector(".lens-snake-grid");
   if (!grid) return;
   startSnakeDemo(grid, grid.dataset.demoType || "redraw");
+  const caption = document.querySelector(".lens-caption[data-has-caption-cycle='true']");
+  if (caption) {
+    const mode = currentLessonStep()?.validationMode;
+    if (lensCaptionMode !== mode) {
+      lensCaptionMode = mode;
+      lensCaptionStartedAt = Date.now();
+    }
+    const remaining = Math.max(0, 2800 - (Date.now() - lensCaptionStartedAt));
+    lensCaptionTimer = window.setTimeout(() => {
+      caption.textContent = caption.dataset.phaseTwoCaption || caption.textContent;
+      lensCaptionTimer = null;
+    }, remaining);
+  }
+}
+
+function clearLensCaptionTimer(reset = true) {
+  if (lensCaptionTimer) {
+    clearTimeout(lensCaptionTimer);
+    lensCaptionTimer = null;
+  }
+  if (reset) {
+    lensCaptionMode = null;
+    lensCaptionStartedAt = 0;
+  }
 }
 
 function startSnakeDemo(container, demoType) {
@@ -2696,6 +2894,7 @@ function runChunk() {
   if (state.project === "reaction") runReactionForStep(step, result);
   if (state.project === "clicker") runClickerForStep(step, result);
   if (state.project === "rps") runRpsForStep(step, result);
+  applyAxisTrace(step);
   const message = result.message || step.runSuccess || "Output confirmed.";
   state.stepStatus = {
     project: state.project,
@@ -3487,6 +3686,9 @@ function runRpsForStep(step, result) {
 }
 
 let rewardTimer = null;
+let lensCaptionTimer = null;
+let lensCaptionMode = null;
+let lensCaptionStartedAt = 0;
 let reactionStartedAt = 0;
 function runReaction() {
   state.outputResult = {
@@ -3552,6 +3754,7 @@ function resetChunk() {
 }
 
 function previousStep() {
+  clearLensCaptionTimer();
   state.step = Math.max(0, state.step - 1);
   loadStepCode();
   resetStepInteractionState();
@@ -3560,6 +3763,7 @@ function previousStep() {
 }
 
 function nextStep() {
+  clearLensCaptionTimer();
   const step = currentLessonStep();
   if (!state.stepStatus.success || state.stepStatus.stepId !== step.id) {
     state.log = "Run this chunk once before moving on. No pressure - just confirm the signal.";

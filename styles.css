@@ -1141,6 +1141,13 @@ body.reduced-motion .map-card.node-recent {
   text-align: center;
 }
 
+.lens-axis-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+  text-transform: uppercase;
+}
+
 .lens-code {
   display: flex;
   min-height: 0;
@@ -1235,6 +1242,14 @@ body.reduced-motion .map-card.node-recent {
 
 body.reduced-motion .snake-lens-sidebar {
   animation: none;
+}
+
+.lens--cause .snake-lens-demo {
+  animation-delay: 0.6s;
+}
+
+.lens--control .snake-lens-demo {
+  animation-timing-function: steps(2, end);
 }
 
 .counter-output,
