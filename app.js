@@ -1873,7 +1873,25 @@ function initGlitch() {
   glitchEl.className = "glitch-entity glitch--dormant";
   glitchEl.innerHTML = `
     <button type="button" class="glitch-face" aria-label="Ask The Glitch for a linear explanation">
-      ${glitchSvgMarkup()}
+      <span class="glitch-avatar-stack" aria-hidden="true">
+        <img class="glitch-avatar glitch-avatar-main" src="assets/glitch-avatar.svg" alt="" />
+        <img class="glitch-avatar glitch-avatar-cyan" src="assets/glitch-avatar.svg" alt="" />
+        <img class="glitch-avatar glitch-avatar-pink" src="assets/glitch-avatar.svg" alt="" />
+      </span>
+      <span class="glitch-particles" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
     </button>
     <section class="glitch-bubble" aria-label="The Glitch explanation">
       <button type="button" class="glitch-close" aria-label="Close The Glitch explanation">×</button>
@@ -1958,6 +1976,24 @@ Other paths are skipped.
 
 This is how programs make decisions instead of running every line.`;
     }
+    if (axis === "state") {
+      return `This step is about what the system remembers.
+
+The program stores a value so it can use it again.
+
+That stored value becomes part of the system's current state.
+
+When state changes, the next result can change too.`;
+    }
+    if (axis === "result") {
+      return `This step is about seeing the signal.
+
+The code runs, then something visible happens.
+
+The important part is the connection between the line of code and the output on screen.
+
+First, see the result. Later, you will control when and why it happens.`;
+    }
     return "";
   } catch (error) {
     return "";
@@ -1983,8 +2019,28 @@ function applyGlitchState() {
   }
 }
 
+function updateGlitchPosition() {
+  if (!glitchEl) return;
+
+  const workspace = document.querySelector(".workspace");
+  const goalPanel = document.querySelector(".side-panel");
+
+  if (!workspace || !goalPanel || goalPanel.offsetParent === null) return;
+
+  const goalRect = goalPanel.getBoundingClientRect();
+
+  const centerX = goalRect.left / 2;
+
+  const centerY =
+    goalRect.top + Math.min(goalRect.height * 0.24, 210);
+
+  glitchEl.style.left = `${centerX + window.scrollX}px`;
+  glitchEl.style.top = `${centerY + window.scrollY}px`;
+}
+
 function updateGlitch() {
   applyGlitchState();
+  updateGlitchPosition();
 }
 
 function save() {
