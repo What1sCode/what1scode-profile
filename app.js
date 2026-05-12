@@ -2028,7 +2028,7 @@ function updateGlitchPosition() {
   const colRect = glitchCol.getBoundingClientRect();
   const panelCenter = panelRect.top + panelRect.height / 2 - colRect.top;
   const entityHeight = glitchEl.offsetHeight || 220;
-  glitchEl.style.marginTop = `${Math.max(0, panelCenter - entityHeight / 2)}px`;
+  glitchEl.style.marginTop = `${Math.max(0, panelCenter - entityHeight / 2 - 192)}px`;
 }
 
 function updateGlitch() {
