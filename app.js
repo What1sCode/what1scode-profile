@@ -99,16 +99,14 @@ const lessonData = {
       stepLabel: "Step 1 / 7",
       goal: "Watch the loop before naming it.",
       instruction: "Click Run. You are looking for one thing: the screen changes.",
-      hint: `The screen changes when show(...) receives a supported color.
-Try:
-show("teal")`,
+      hint: `nothing happens until you run it. I've typed a lot of things that never ran. this is different.`,
       code: `# Watch the signal
 show("teal")`,
       prediction: {
-        prompt: "What do you think will change?",
+        prompt: "show() is written but hasn't run yet. Is the screen already teal?",
         type: "choice",
-        options: ["The text", "The color", "The score", "Not sure"],
-        expected: "The color"
+        options: ["Yes — writing it is enough", "No — it only changes when the code runs", "Only if teal is a valid color", "Not sure"],
+        expected: "No — it only changes when the code runs"
       },
       runSuccess: "Signal locked.\nThe screen changed color.",
       conceptName: "input → output",
@@ -123,15 +121,14 @@ show("teal")`,
       stepLabel: "Step 2 / 7",
       goal: "Store the current color.",
       instruction: "A variable remembers one value. Change the color name, then run it.",
-      hint: `A variable stores one value.
-Try:
-color = "purple"`,
+      hint: `color holds "teal" now. the screen doesn't know that yet. knowing and showing are different.`,
       code: `# Store the current color
 color = "teal"`,
       prediction: {
-        prompt: "What color is stored?",
-        type: "text",
-        expected: "teal"
+        prompt: "color = \"teal\" stores a value. What happens to the screen right now?",
+        type: "choice",
+        options: ["It turns teal", "Nothing — storing doesn't display", "It stores and shows at the same time", "Not sure"],
+        expected: "Nothing — storing doesn't display"
       },
       runSuccess: "Output confirmed.\ncolor now stores \"teal\".",
       conceptName: "variable",
@@ -146,18 +143,17 @@ color = "teal"`,
       stepLabel: "Step 3 / 7",
       goal: "Display the stored color.",
       instruction: "The screen can show what the program remembers. Run it and watch the output panel.",
-      hint: `You already stored the color. Now send it to the screen:
-show(color)`,
+      hint: `show() doesn't care what you named it. it reads what's inside.`,
       code: `# Store the current color
 color = "teal"
 
 # Show it on the screen
 show(color)`,
       prediction: {
-        prompt: "What should show(color) display?",
+        prompt: "show(color) receives the variable. What does it actually send to the screen?",
         type: "choice",
-        options: ["Only the word teal", "Only a teal panel", "Both", "Not sure"],
-        expected: "Both"
+        options: ["The word \"color\"", "The value stored in color", "Both the name and the value", "Not sure"],
+        expected: "The value stored in color"
       },
       runSuccess: "Output confirmed.\nshow(color) displayed the stored value.",
       conceptName: "screen update",
@@ -172,8 +168,7 @@ show(color)`,
       stepLabel: "Step 4 / 7",
       goal: "Change the stored value.",
       instruction: "When a variable changes, the output can change too. The last value wins.",
-      hint: `Change the color assignment before the second show().
-Try changing "teal" to "orange".`,
+      hint: `last value wins. everything before it was just practice.`,
       code: `# First color
 color = "teal"
 show(color)
@@ -182,9 +177,10 @@ show(color)
 color = "orange"
 show(color)`,
       prediction: {
-        prompt: "What color will be shown last?",
-        type: "text",
-        expected: "orange"
+        prompt: "color gets assigned twice. Which assignment controls what you see?",
+        type: "choice",
+        options: ["The first one", "The last one", "Both — they average out", "Not sure"],
+        expected: "The last one"
       },
       runSuccess: "Output confirmed.\nThe final stored color is \"orange\".",
       conceptName: "state change",
@@ -199,8 +195,7 @@ show(color)`,
       stepLabel: "Step 5 / 7",
       goal: "Put the color change inside a function.",
       instruction: "A function is a named action. This one changes the screen color.",
-      hint: `The def line names the action. The call line runs it.
-Make sure flash_color() appears after the def block.`,
+      hint: `def is a blueprint. the call is the moment. you need both, but only one of them does anything.`,
       code: `# Name the action
 def flash_color():
     color = "teal"
@@ -209,10 +204,10 @@ def flash_color():
 # Run the action
 flash_color()`,
       prediction: {
-        prompt: "Which line starts the color change?",
+        prompt: "def flash_color(): describes the action. flash_color() calls it. Which one makes something happen?",
         type: "choice",
-        options: ["def flash_color():", "color = \"teal\"", "show(color)", "flash_color()"],
-        expected: "flash_color()"
+        options: ["def flash_color(): — that's where the code is", "flash_color() — the call is what runs it", "Both lines together", "Not sure"],
+        expected: "flash_color() — the call is what runs it"
       },
       runSuccess: "Working.\nflash_color() ran the function.",
       conceptName: "function",
@@ -227,8 +222,7 @@ flash_color()`,
       stepLabel: "Step 6 / 7",
       goal: "Make a click trigger the function.",
       instruction: "A click is an event. An event can trigger code.",
-      hint: `button.on_click takes the function name, not a call.
-Try: button.on_click(flash_color)`,
+      hint: `on_click registers the function. it doesn't fire it. the button is just waiting now.`,
       code: `# Define the action
 def flash_color():
     color = "teal"
@@ -237,9 +231,10 @@ def flash_color():
 # Connect the click
 button.on_click(flash_color)`,
       prediction: {
-        prompt: "What should happen when the button is clicked?",
-        type: "text",
-        expected: "flash_color runs"
+        prompt: "button.on_click(flash_color) is written, but nobody's clicked yet. Has flash_color run?",
+        type: "choice",
+        options: ["Yes — connecting it runs it once", "No — it runs only when clicked", "Only if flash_color was already called before", "Not sure"],
+        expected: "No — it runs only when clicked"
       },
       runSuccess: "Button connected.\nClick triggered flash_color().",
       conceptName: "event",
@@ -254,8 +249,7 @@ button.on_click(flash_color)`,
       stepLabel: "Bonus",
       goal: "Let the program choose a color.",
       instruction: "A list stores multiple options. random_choice picks one.",
-      hint: `random_choice needs a list with brackets.
-colors = ["teal", "purple", "orange", "green"]`,
+      hint: `random doesn't mean fair. it means the program stopped caring about the outcome.`,
       code: `# Store color options
 colors = ["teal", "purple", "orange", "green"]
 
@@ -265,10 +259,10 @@ color = random_choice(colors)
 # Show it
 show(color)`,
       prediction: {
-        prompt: "Will the same color appear every time?",
+        prompt: "You run this three times. Could you get the same color twice in a row?",
         type: "choice",
-        options: ["Yes", "No", "Only if teal is first", "Not sure"],
-        expected: "No"
+        options: ["No — it avoids repeats", "Yes — the same color is always possible", "Only if it's first in the list", "Not sure"],
+        expected: "Yes — the same color is always possible"
       },
       runSuccess: "Output confirmed.\nrandom_choice picked a color.",
       conceptName: "random choice",
@@ -285,15 +279,15 @@ show(color)`,
       stepLabel: "Step 1 / 7",
       goal: "Watch randomness become output.",
       instruction: "Click Run. You are looking for a number from 1 to 6.",
-      hint: `random_number(1, 6) gives the die a value between 1 and 6.`,
+      hint: `1 to 6. inclusive on both ends. it won't go outside the box it was given.`,
       code: `# Roll one die
 roll = random_number(1, 6)
 show(roll)`,
       prediction: {
-        prompt: "What kind of value should appear?",
+        prompt: "random_number(1, 6) picks within a range. Can it produce 0? Can it produce 7?",
         type: "choice",
-        options: ["A color", "A number from 1 to 6", "A word", "Not sure"],
-        expected: "A number from 1 to 6"
+        options: ["Yes to both", "No to both", "0 is possible, 7 is not", "Not sure"],
+        expected: "No to both"
       },
       runSuccess: "Chunk compiled.\nroll is a number from 1 to 6.",
       conceptName: "random number",
@@ -308,16 +302,17 @@ show(roll)`,
       stepLabel: "Step 2 / 7",
       goal: "Save the random number.",
       instruction: "A variable can store a result. Here, roll stores the die value.",
-      hint: `The variable name is roll. That is where the die result gets stored.`,
+      hint: `values that aren't stored just go. nothing dramatic. they just stop existing.`,
       code: `# Roll one die
 roll = random_number(1, 6)
 
 # Store and show it
 show(roll)`,
       prediction: {
-        prompt: "What variable stores the result?",
-        type: "text",
-        expected: "roll"
+        prompt: "random_number(1, 6) produces a value. What happens to that value if you don't store it?",
+        type: "choice",
+        options: ["It shows on screen automatically", "It disappears — nothing holds it", "It gets stored in a default variable", "Not sure"],
+        expected: "It disappears — nothing holds it"
       },
       runSuccess: "Output confirmed.\nroll stored the die result.",
       conceptName: "variable",
@@ -332,9 +327,7 @@ show(roll)`,
       stepLabel: "Step 3 / 7",
       goal: "Turn the number into readable output.",
       instruction: "Programs often combine text and values. This makes output easier to read.",
-      hint: `Build the message first, then show it:
-message = "You rolled " + roll
-show(message)`,
+      hint: `the + joins the text with whatever's inside roll. not the name. the contents.`,
       code: `# Roll one die
 roll = random_number(1, 6)
 
@@ -342,9 +335,10 @@ roll = random_number(1, 6)
 message = "You rolled " + roll
 show(message)`,
       prediction: {
-        prompt: "What should the message look like?",
-        type: "text",
-        expected: "You rolled"
+        prompt: "If roll is 4, what does message become?",
+        type: "choice",
+        options: ["\"You rolled\"", "\"You rolled roll\"", "\"You rolled 4\"", "Not sure"],
+        expected: "\"You rolled 4\""
       },
       runSuccess: "Output confirmed.\nThe number became a message.",
       conceptName: "string output",
@@ -359,18 +353,17 @@ show(message)`,
       stepLabel: "Step 4 / 7",
       goal: "Use data to control a visual.",
       instruction: "The number controls which dice face appears. Data can drive visuals.",
-      hint: `show_dice takes the roll number and draws the matching face.
-Try: show_dice(roll)`,
+      hint: `show_dice doesn't pick anything. it draws what it's given. the number decides.`,
       code: `# Roll one die
 roll = random_number(1, 6)
 
 # Show the matching dice face
 show_dice(roll)`,
       prediction: {
-        prompt: "If roll is 6, what should appear?",
+        prompt: "show_dice() draws the face. What controls how many pips appear?",
         type: "choice",
-        options: ["One pip", "Six pips", "A color flash", "Not sure"],
-        expected: "Six pips"
+        options: ["The name of the variable", "The value stored in roll", "show_dice itself decides", "Not sure"],
+        expected: "The value stored in roll"
       },
       runSuccess: "Output confirmed.\nroll controlled the dice face.",
       conceptName: "data-driven visual",
@@ -385,8 +378,7 @@ show_dice(roll)`,
       stepLabel: "Step 5 / 7",
       goal: "Put the roll into a reusable function.",
       instruction: "A function is a named action. roll_die() means roll and show the result.",
-      hint: `def roll_die(): names the action. roll_die() runs it.
-Make sure roll_die() appears after the def block.`,
+      hint: `the def block just sits there until called. very patient. nothing like me.`,
       code: `# Name the action
 def roll_die():
     roll = random_number(1, 6)
@@ -395,10 +387,10 @@ def roll_die():
 # Run the action
 roll_die()`,
       prediction: {
-        prompt: "Which line starts the roll?",
+        prompt: "If you removed the last line roll_die(), would anything happen when you run the code?",
         type: "choice",
-        options: ["def roll_die():", "roll = random_number(1, 6)", "show_dice(roll)", "roll_die()"],
-        expected: "roll_die()"
+        options: ["Yes — the def block runs itself", "No — defining it doesn't run it", "It would error immediately", "Not sure"],
+        expected: "No — defining it doesn't run it"
       },
       runSuccess: "Working.\nroll_die() ran the function.",
       conceptName: "function",
@@ -413,8 +405,7 @@ roll_die()`,
       stepLabel: "Step 6 / 7",
       goal: "Make a click roll the die.",
       instruction: "A button click can trigger the roll_die function.",
-      hint: `button.on_click takes the function name without ().
-Try: button.on_click(roll_die)`,
+      hint: `registered. not running. the button knows what to do. it's just not doing it yet.`,
       code: `# Define the action
 def roll_die():
     roll = random_number(1, 6)
@@ -423,9 +414,10 @@ def roll_die():
 # Connect the click
 button.on_click(roll_die)`,
       prediction: {
-        prompt: "What should happen when the button is clicked?",
-        type: "text",
-        expected: "roll_die runs"
+        prompt: "You write button.on_click(roll_die). Before anyone clicks — has roll_die run yet?",
+        type: "choice",
+        options: ["Yes, once on setup", "No — it waits for the click", "It depends on how fast the page loads", "Not sure"],
+        expected: "No — it waits for the click"
       },
       runSuccess: "Button connected.\nClick triggered roll_die().",
       conceptName: "event",
@@ -440,7 +432,7 @@ button.on_click(roll_die)`,
       stepLabel: "Step 7 / 7",
       goal: "Confirm the value changes across runs.",
       instruction: "Run it several times. The structure stays the same, but the value can change.",
-      hint: `The structure stays the same each run. Click Run several times and watch the value change.`,
+      hint: `same code. different result. that's not a bug. that's the point.`,
       code: `# Define the action
 def roll_die():
     roll = random_number(1, 6)
@@ -448,10 +440,10 @@ def roll_die():
 
 button.on_click(roll_die)`,
       prediction: {
-        prompt: "Will every roll be the same?",
+        prompt: "The code doesn't change between clicks. The output might. How?",
         type: "choice",
-        options: ["Yes", "No", "Only if the button changes", "Not sure"],
-        expected: "No"
+        options: ["It's a bug", "random_number produces a new value each time it runs", "The button resets something internally", "Not sure"],
+        expected: "random_number produces a new value each time it runs"
       },
       runSuccess: "Output confirmed.\nThe same code can produce a new result.",
       conceptName: "repeatable action",
@@ -468,15 +460,15 @@ button.on_click(roll_die)`,
       stepLabel: "Step 1 / 7",
       goal: "Watch the screen wait, then flash.",
       instruction: "Click Run. Wait for the screen to change. Do not click early.",
-      hint: `Start with wait(), then flash("green"). The order matters.`,
+      hint: `lines run in order. one finishes before the next starts. it's boring but it's reliable.`,
       code: `# Wait, then flash
 wait()
 flash("green")`,
       prediction: {
-        prompt: "What should happen after waiting?",
+        prompt: "wait() and flash() are on separate lines. Does flash() run at the same time as wait(), or after?",
         type: "choice",
-        options: ["The screen flashes", "The dice rolls", "The score resets", "Not sure"],
-        expected: "The screen flashes"
+        options: ["At the same time", "After wait() finishes", "Before wait() — order doesn't matter", "Not sure"],
+        expected: "After wait() finishes"
       },
       runSuccess: "Signal armed.\nThe screen flashed.",
       conceptName: "timed output",
@@ -491,15 +483,15 @@ flash("green")`,
       stepLabel: "Step 2 / 7",
       goal: "Remember when the flash starts.",
       instruction: "A timer needs a starting point. start_time stores when the flash appears.",
-      hint: `now() captures the current moment. Store it in start_time.`,
+      hint: `now() is always right now. not when you first ran the program. not when you last called it. now.`,
       code: `# Store the start time
 start_time = now()
 show("green")`,
       prediction: {
-        prompt: "What does start_time remember?",
+        prompt: "If you call now() again one second later, do you get the same value?",
         type: "choice",
-        options: ["The color", "The current time", "The score", "Not sure"],
-        expected: "The current time"
+        options: ["Yes — now() is fixed once called", "No — now() returns the current moment each time", "Only if you stored it first", "Not sure"],
+        expected: "No — now() returns the current moment each time"
       },
       runSuccess: "Output confirmed.\nstart_time stored the current time.",
       conceptName: "time value",
@@ -514,8 +506,7 @@ show("green")`,
       stepLabel: "Step 3 / 7",
       goal: "Compare now to the start time.",
       instruction: "Reaction time is the difference between two moments.",
-      hint: `Reaction time is the difference between now and when the timer started.
-reaction_time = now() - start_time`,
+      hint: `two timestamps, one subtraction. the gap is the thing. that gap is you.`,
       code: `# Start timing
 start_time = now()
 
@@ -523,10 +514,10 @@ start_time = now()
 reaction_time = now() - start_time
 show(reaction_time)`,
       prediction: {
-        prompt: "What does reaction_time measure?",
+        prompt: "reaction_time = now() - start_time. What does subtracting start_time accomplish?",
         type: "choice",
-        options: ["How fast the click happened", "What color flashed", "How many buttons exist", "Not sure"],
-        expected: "How fast the click happened"
+        options: ["It resets the timer to zero", "It measures the gap between then and now", "It removes start_time from memory", "Not sure"],
+        expected: "It measures the gap between then and now"
       },
       runSuccess: "Input detected.\nReaction time measured.",
       conceptName: "difference",
@@ -541,16 +532,17 @@ show(reaction_time)`,
       stepLabel: "Step 4 / 7",
       goal: "Remember whether the game is waiting or ready.",
       instruction: "State tells the app what phase it is in. Waiting and ready are different states.",
-      hint: `Set state to "waiting" first, then change it to "ready" after wait().`,
+      hint: `wait() holds the line until it's done. then the next line runs. state doesn't change on its own.`,
       code: `# Track the current state
 state = "waiting"
 wait()
 state = "ready"
 show("green")`,
       prediction: {
-        prompt: "What is the final state?",
-        type: "text",
-        expected: "ready"
+        prompt: "state changes from \"waiting\" to \"ready\". What forces that change?",
+        type: "choice",
+        options: ["Time passing automatically", "wait() completing, then the next line running", "The user clicking", "Not sure"],
+        expected: "wait() completing, then the next line running"
       },
       runSuccess: "State changed.\nwaiting → ready",
       conceptName: "state",
@@ -565,7 +557,7 @@ show("green")`,
       stepLabel: "Step 5 / 7",
       goal: "Make clicks mean different things in different states.",
       instruction: "A click before ready should not count. State changes what input means.",
-      hint: `Use if state == "waiting": and if state == "ready": on separate lines.`,
+      hint: `same button. different state. state decides what the click means.`,
       code: `# If the user clicks too early
 if state == "waiting":
     show("too early")
@@ -573,10 +565,10 @@ if state == "waiting":
 if state == "ready":
     show("clicked")`,
       prediction: {
-        prompt: "What should happen if the user clicks while waiting?",
+        prompt: "The same click runs different code depending on state. What makes the same action do two different things?",
         type: "choice",
-        options: ["too early", "clicked", "green", "Not sure"],
-        expected: "too early"
+        options: ["The button changes between clicks", "The state variable controls which branch runs", "The click timing changes the behavior", "Not sure"],
+        expected: "The state variable controls which branch runs"
       },
       runSuccess: "Logic confirmed.\nThe click response depends on state.",
       conceptName: "conditional",
@@ -591,8 +583,7 @@ if state == "ready":
       stepLabel: "Step 6 / 7",
       goal: "Make the click run the reaction check.",
       instruction: "The click event runs the reaction logic.",
-      hint: `The function is check_reaction. Connect it with:
-button.on_click(check_reaction)`,
+      hint: `start_time lives outside the function. check_reaction just reads it. the function doesn't own it.`,
       code: `# Define the click response
 def check_reaction():
     reaction_time = now() - start_time
@@ -601,9 +592,10 @@ def check_reaction():
 # Connect the click
 button.on_click(check_reaction)`,
       prediction: {
-        prompt: "What should happen when the button is clicked after the flash?",
-        type: "text",
-        expected: "reaction time shows"
+        prompt: "check_reaction() uses start_time to calculate the result. Where does start_time come from?",
+        type: "choice",
+        options: ["It's created fresh inside check_reaction() each time", "It was stored earlier, outside the function", "now() automatically provides it", "Not sure"],
+        expected: "It was stored earlier, outside the function"
       },
       runSuccess: "Button connected.\nClick triggered check_reaction().",
       conceptName: "event",
@@ -618,7 +610,7 @@ button.on_click(check_reaction)`,
       stepLabel: "Step 7 / 7",
       goal: "Put the reaction timer together.",
       instruction: "The timer waits, flashes, then measures the click.",
-      hint: `All pieces need to be in order: state, wait, ready, start_time, def, button.`,
+      hint: `start_time has to exist before anything can subtract from it. sequence isn't optional here.`,
       code: `# Start waiting
 state = "waiting"
 wait()
@@ -635,10 +627,10 @@ def check_reaction():
 
 button.on_click(check_reaction)`,
       prediction: {
-        prompt: "What are the three phases?",
+        prompt: "What would happen if reaction_time = now() - start_time ran before start_time was ever set?",
         type: "choice",
-          options: ["wait → flash → measure", "roll → flash → score", "click → dice → color", "Not sure"],
-          expected: "wait → flash → measure"
+        options: ["The timer would be more accurate", "reaction_time would be calculated before start_time exists", "Nothing — order doesn't matter in code", "Not sure"],
+        expected: "reaction_time would be calculated before start_time exists"
       },
       runSuccess: "Input detected.\nReaction loop working.",
       conceptName: "state loop",
@@ -655,18 +647,15 @@ button.on_click(check_reaction)`,
       stepLabel: "Step 1 / 6",
       goal: "Watch a number become output.",
       instruction: "Click Run. You are looking for a score value.",
-      hint: `A score starts as stored state.
-Try:
-score = 0
-show(score)`,
+      hint: `score is 0. the screen doesn't know that yet. show() is what tells it.`,
       code: `# Show the starting score
 score = 0
 show(score)`,
       prediction: {
-        prompt: "What should appear?",
+        prompt: "score = 0 stores the value. Before show(score) runs — is 0 visible on screen?",
         type: "choice",
-        options: ["0", "1", "A color", "Not sure"],
-        expected: "0"
+        options: ["Yes — storing it displays it", "No — show() hasn't run yet", "It depends on the browser", "Not sure"],
+        expected: "No — show() hasn't run yet"
       },
       runSuccess: "Output confirmed.\nScore shown: 0.",
       conceptName: "score",
@@ -681,14 +670,14 @@ show(score)`,
       stepLabel: "Step 2 / 6",
       goal: "Store the starting score.",
       instruction: "A counter needs a value to remember before it can change.",
-      hint: `Store the score in one variable:
-score = 0`,
+      hint: `zero means nothing has happened yet. that's not a default. that's a statement.`,
       code: `# Store the score
 score = 0`,
       prediction: {
-        prompt: "What variable stores the score?",
-        type: "text",
-        expected: "score"
+        prompt: "The counter starts at 0. Why 0 and not 1?",
+        type: "choice",
+        options: ["Because 0 is the only valid start", "Because nothing has happened yet — 0 means no events", "It's required by the language", "Not sure"],
+        expected: "Because nothing has happened yet — 0 means no events"
       },
       runSuccess: "State stored.\nscore starts at 0.",
       conceptName: "state",
@@ -703,8 +692,7 @@ score = 0`,
       stepLabel: "Step 3 / 6",
       goal: "Increase the score by one.",
       instruction: "A counter changes by taking the old value and adding one.",
-      hint: `Use the old score to make the new score:
-score = score + 1`,
+      hint: `the right side runs first. it reads the old score, adds one, then the left side stores the result.`,
       code: `# Start score
 score = 0
 
@@ -712,10 +700,10 @@ score = 0
 score = score + 1
 show(score)`,
       prediction: {
-        prompt: "What should the score become?",
+        prompt: "score = score + 1 — what is score on the right side of = referring to?",
         type: "choice",
-        options: ["0", "1", "2", "Not sure"],
-        expected: "1"
+        options: ["The new score after adding", "The old score, before adding", "The number 1", "Not sure"],
+        expected: "The old score, before adding"
       },
       runSuccess: "Output confirmed.\nscore increased to 1.",
       conceptName: "increment",
@@ -730,7 +718,7 @@ show(score)`,
       stepLabel: "Step 4 / 6",
       goal: "Put the score change inside a named action.",
       instruction: "A function packages the score update so it can run again.",
-      hint: `Define add_point(), indent the score update, then call add_point().`,
+      hint: `the function has to exist before you can call it. you can't use something that hasn't been built yet.`,
       code: `# Name the score action
 def add_point():
     score = 0
@@ -739,10 +727,10 @@ def add_point():
 
 add_point()`,
       prediction: {
-        prompt: "Which line runs the action?",
+        prompt: "Could you put the call add_point() before the def block?",
         type: "choice",
-        options: ["def add_point():", "score = 0", "show(score)", "add_point()"],
-        expected: "add_point()"
+        options: ["Yes — order doesn't matter", "No — the function must exist before it's called", "Only if they're on the same line", "Not sure"],
+        expected: "No — the function must exist before it's called"
       },
       runSuccess: "Working.\nadd_point() updated the score.",
       conceptName: "function",
@@ -757,8 +745,7 @@ add_point()`,
       stepLabel: "Step 5 / 6",
       goal: "Make a button run the score update.",
       instruction: "The click event can trigger add_point later.",
-      hint: `Pass the function name without parentheses:
-button.on_click(add_point)`,
+      hint: `add_point is the function. add_point() is running it immediately. on_click wants to hold it, not run it.`,
       code: `# Define the score action
 def add_point():
     score = score + 1
@@ -766,9 +753,10 @@ def add_point():
 
 button.on_click(add_point)`,
       prediction: {
-        prompt: "What should the button click run?",
-        type: "text",
-        expected: "add_point"
+        prompt: "button.on_click(add_point) — why is there no () after add_point here?",
+        type: "choice",
+        options: ["It's a typo that still works", "Without () you pass the function itself, not its result", "() would cause an error here", "Not sure"],
+        expected: "Without () you pass the function itself, not its result"
       },
       runSuccess: "Button connected.\nClick can run add_point.",
       conceptName: "event",
@@ -783,7 +771,7 @@ button.on_click(add_point)`,
       stepLabel: "Step 6 / 6",
       goal: "Put the counter together.",
       instruction: "The counter stores score, updates it, shows it, and connects the click.",
-      hint: `Use all four pieces: score, def add_point(), show(score), button.on_click(add_point).`,
+      hint: `score accumulates. it doesn't reset unless you tell it to. nobody's telling it to.`,
       code: `# Starting score
 score = 0
 
@@ -793,10 +781,10 @@ def add_point():
 
 button.on_click(add_point)`,
       prediction: {
-        prompt: "What changes when the click runs?",
+        prompt: "After 5 clicks the score is 5. On the 6th click — what will score be?",
         type: "choice",
-        options: ["The score", "The color", "The project name", "Not sure"],
-        expected: "The score"
+        options: ["5", "6", "It resets to 0", "Not sure"],
+        expected: "6"
       },
       runSuccess: "Counter complete.\nScore updates are connected.",
       conceptName: "feedback loop",
@@ -813,17 +801,15 @@ button.on_click(add_point)`,
       stepLabel: "Step 1 / 6",
       goal: "Store the player move.",
       instruction: "A choice starts as one stored value.",
-      hint: `Store a supported move:
-player = "rock"
-show(player)`,
+      hint: `show() reads what's there right now. change the value, the output changes.`,
       code: `# Store the player move
 player = "rock"
 show(player)`,
       prediction: {
-        prompt: "What move should show?",
+        prompt: "If you changed \"rock\" to \"scissors\" — what would show() display?",
         type: "choice",
-        options: ["rock", "paper", "scissors", "Not sure"],
-        expected: "rock"
+        options: ["rock — it was already stored", "scissors — show() reads the current value", "Both — it shows the change happening", "Not sure"],
+        expected: "scissors — show() reads the current value"
       },
       runSuccess: "Choice stored.\nplayer is rock.",
       conceptName: "choice",
@@ -838,17 +824,16 @@ show(player)`,
       stepLabel: "Step 2 / 6",
       goal: "Let the program choose a move.",
       instruction: "A list gives the computer possible moves. random_choice picks one.",
-      hint: `Put all moves in a list, then choose from it:
-computer = random_choice(moves)`,
+      hint: `random_choice doesn't track history. it doesn't know what it picked last time.`,
       code: `# Computer move options
 moves = ["rock", "paper", "scissors"]
 computer = random_choice(moves)
 show(computer)`,
       prediction: {
-        prompt: "Will the same move appear every time?",
+        prompt: "moves has 3 options. Across many runs, roughly how often would you expect \"rock\"?",
         type: "choice",
-        options: ["Yes", "No", "Only rock", "Not sure"],
-        expected: "No"
+        options: ["Every time", "About 1 in 3 times", "Never — it avoids repeating", "Not sure"],
+        expected: "About 1 in 3 times"
       },
       runSuccess: "Computer move selected.",
       conceptName: "random choice",
@@ -863,9 +848,7 @@ show(computer)`,
       stepLabel: "Step 3 / 6",
       goal: "Display player and computer choices.",
       instruction: "Before deciding a result, show the values being compared.",
-      hint: `Show both stored values:
-show(player)
-show(computer)`,
+      hint: `by the time show(player) runs, computer already has a value. both were set before either was shown.`,
       code: `# Player and computer choices
 player = "rock"
 moves = ["rock", "paper", "scissors"]
@@ -874,10 +857,10 @@ computer = random_choice(moves)
 show(player)
 show(computer)`,
       prediction: {
-        prompt: "What values should appear?",
+        prompt: "show(player) runs first. Does computer already have a value at that point?",
         type: "choice",
-        options: ["Player only", "Computer only", "Both choices", "Not sure"],
-        expected: "Both choices"
+        options: ["No — computer isn't assigned yet", "Yes — computer was set before show(player) runs", "It depends on which runs faster", "Not sure"],
+        expected: "Yes — computer was set before show(player) runs"
       },
       runSuccess: "Both choices are visible.",
       conceptName: "comparison setup",
@@ -892,8 +875,7 @@ show(computer)`,
       stepLabel: "Step 4 / 6",
       goal: "Use a condition to detect matching choices.",
       instruction: "When both choices match, the result is a tie.",
-      hint: `Compare the two stored values:
-if player == computer:`,
+      hint: `== compares values. if they match, it's true. the program isn't deciding anything. it's just checking.`,
       code: `# Tie check
 player = "rock"
 computer = "rock"
@@ -903,10 +885,10 @@ if player == computer:
 
 show(result)`,
       prediction: {
-        prompt: "What result should show?",
+        prompt: "player == computer is the condition. What makes it true?",
         type: "choice",
-        options: ["tie", "player wins", "computer wins", "Not sure"],
-        expected: "tie"
+        options: ["player is always \"rock\"", "Both variables hold the same value", "The game decided it's a tie", "Not sure"],
+        expected: "Both variables hold the same value"
       },
       runSuccess: "Condition confirmed.\nMatching choices make a tie.",
       conceptName: "condition",
@@ -921,8 +903,7 @@ show(result)`,
       stepLabel: "Step 5 / 6",
       goal: "Use a condition for one winning case.",
       instruction: "One rule is enough to see how decision logic works.",
-      hint: `Check the exact winning pair:
-if player == "rock" and computer == "scissors":`,
+      hint: `and means both. not one or the other. the condition only runs if the whole thing is true.`,
       code: `# One winning rule
 player = "rock"
 computer = "scissors"
@@ -932,10 +913,10 @@ if player == "rock" and computer == "scissors":
 
 show(result)`,
       prediction: {
-        prompt: "Who wins in this rule?",
+        prompt: "The condition checks player AND computer. If player is rock but computer is paper — does the if run?",
         type: "choice",
-        options: ["player wins", "tie", "computer wins", "Not sure"],
-        expected: "player wins"
+        options: ["Yes — one match is enough", "No — both conditions must be true", "It depends on which matches first", "Not sure"],
+        expected: "No — both conditions must be true"
       },
       runSuccess: "Decision confirmed.\nRock beats scissors.",
       conceptName: "comparison",
@@ -950,7 +931,7 @@ show(result)`,
       stepLabel: "Step 6 / 6",
       goal: "Put the decision loop together.",
       instruction: "Store choices, pick a random move, compare values, and show the result.",
-      hint: `Use player, moves, computer, tie condition, win condition, and show(result).`,
+      hint: `if no condition matches, result never gets set. the code doesn't fill in the gaps you didn't write.`,
       code: `# Player and computer choices
 player = "rock"
 moves = ["rock", "paper", "scissors"]
@@ -964,10 +945,10 @@ if player == "rock" and computer == "scissors":
 
 show(result)`,
       prediction: {
-        prompt: "What decides the result?",
+        prompt: "The code checks for tie, then for rock vs scissors. What happens if neither condition is true?",
         type: "choice",
-        options: ["conditions", "line numbers", "font size", "Not sure"],
-        expected: "conditions"
+        options: ["The last result from a previous run shows", "result is never set — it shows empty or errors", "Conditions always cover every case", "Not sure"],
+        expected: "result is never set — it shows empty or errors"
       },
       runSuccess: "Decision logic connected.\nResult is shown.",
       conceptName: "decision logic",
