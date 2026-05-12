@@ -1290,9 +1290,6 @@ body.reduced-motion .snake-lens-sidebar {
 #glitch-slot {
   flex-shrink: 0;
   width: 0;
-  position: sticky;
-  top: 0;
-  height: 100vh;
   transition: width 0.25s ease;
 }
 

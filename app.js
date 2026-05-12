@@ -2023,14 +2023,16 @@ function applyGlitchState() {
 
 function updateGlitchPosition() {
   if (!glitchEl) return;
-  const sidePanel = document.querySelector(".side-panel");
-  const slotEl = document.getElementById("glitch-slot");
-  if (!sidePanel || !slotEl) return;
-  const panelRect = sidePanel.getBoundingClientRect();
-  const slotRect = slotEl.getBoundingClientRect();
-  const panelCenter = panelRect.top + panelRect.height / 2 - slotRect.top;
-  const entityHeight = glitchEl.offsetHeight || 220;
-  glitchEl.style.marginTop = `${Math.max(0, panelCenter - entityHeight / 2)}px`;
+  requestAnimationFrame(() => {
+    const sidePanel = document.querySelector(".side-panel");
+    const slotEl = document.getElementById("glitch-slot");
+    if (!sidePanel || !slotEl) return;
+    const panelRect = sidePanel.getBoundingClientRect();
+    const slotRect = slotEl.getBoundingClientRect();
+    const panelCenter = panelRect.top + panelRect.height / 2 - slotRect.top;
+    const entityHeight = glitchEl.offsetHeight || 220;
+    glitchEl.style.marginTop = `${Math.max(0, panelCenter - entityHeight / 2)}px`;
+  });
 }
 
 function updateGlitch() {
@@ -2222,7 +2224,9 @@ function render() {
     settings
   };
   const hideTopbar = state.focus && state.screen === "workspace";
-  app.innerHTML = (hideTopbar ? "" : topbar()) + rewardToast() + screens[state.screen]() + snakeLensSidebar();
+  const topbarMount = document.getElementById("topbar-mount");
+  if (topbarMount) topbarMount.innerHTML = hideTopbar ? "" : topbar();
+  app.innerHTML = rewardToast() + screens[state.screen]() + snakeLensSidebar();
   bindAfterRender();
 }
 
