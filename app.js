@@ -1898,7 +1898,7 @@ function initGlitch() {
       <div class="glitch-bubble-copy"></div>
     </section>
   `;
-  document.body.appendChild(glitchEl);
+  (document.getElementById("glitch-slot") || document.body).appendChild(glitchEl);
 
   glitchEl.addEventListener("mouseenter", () => {
     if (glitchState !== "thinking") setGlitchState("aware");
@@ -2010,6 +2010,8 @@ function applyGlitchState() {
     state.settings.reducedMotion ? "glitch--reduced-motion" : "",
     `glitch--${glitchState}`
   ].filter(Boolean).join(" ");
+  const slot = document.getElementById("glitch-slot");
+  if (slot) slot.classList.toggle("glitch-slot--active", visible);
   const copy = glitchEl.querySelector(".glitch-bubble-copy");
   if (copy) copy.textContent = explanation;
   const face = glitchEl.querySelector(".glitch-face");
@@ -2020,22 +2022,7 @@ function applyGlitchState() {
 }
 
 function updateGlitchPosition() {
-  if (!glitchEl) return;
-
-  const workspace = document.querySelector(".workspace");
-  const goalPanel = document.querySelector(".side-panel");
-
-  if (!workspace || !goalPanel || goalPanel.offsetParent === null) return;
-
-  const goalRect = goalPanel.getBoundingClientRect();
-
-  const centerX = goalRect.left / 2;
-
-  const centerY =
-    goalRect.top + Math.min(goalRect.height * 0.24, 210);
-
-  glitchEl.style.left = `${centerX + window.scrollX}px`;
-  glitchEl.style.top = `${centerY + window.scrollY}px`;
+  // position is now handled by CSS flex layout via #glitch-slot
 }
 
 function updateGlitch() {
