@@ -1839,6 +1839,7 @@ const state = {
     project: null,
     stepId: null
   },
+  outputPhase: "idle",
   outputResult: null,
   lastSuccessfulRun: {
     project: null,
@@ -1919,6 +1920,7 @@ function safeRestoreState() {
     project: null,
     stepId: null
   };
+  state.outputPhase = "idle";
   state.outputResult = null;
 }
 
@@ -2232,6 +2234,16 @@ function setScreen(screen) {
   state.screen = VALID_SCREENS.has(screen) ? screen : "home";
   if (state.screen !== "workspace") clearGlitchIdleTimer();
   state.log = "Output waiting.";
+  state.stepStatus = {
+    project: state.project,
+    stepId: currentLessonStep() ? currentLessonStep().id : null,
+    ran: false,
+    success: false,
+    message: ""
+  };
+  state.showConceptLock = false;
+  state.outputPhase = "idle";
+  state.outputResult = null;
   save();
   render();
   requestAnimationFrame(updateGlitch);
@@ -2285,6 +2297,7 @@ function resetStepInteractionState() {
     success: false,
     message: ""
   };
+  state.outputPhase = "idle";
   state.outputResult = null;
 }
 
@@ -3215,7 +3228,19 @@ function skipOptionalStep() {
   completeProject();
 }
 
+function neutralBlackOutput(id) {
+  if (id === "color") return `<div class="mini-output" aria-label="No color output yet"></div>`;
+  if (id === "dice") return `<div class="dice-output" aria-label="No dice output yet"></div>`;
+  if (id === "clicker") return `<div class="counter-output" aria-label="No score output yet"></div>`;
+  if (id === "rps") return `<div class="rps-output" aria-label="No choice output yet"></div>`;
+  return `<div class="mini-output" aria-label="No timed output yet"></div>`;
+}
+
 function outputMarkup(id) {
+  if (state.outputPhase !== "result") {
+    return neutralBlackOutput(id);
+  }
+
   const r = state.outputResult;
   if (id === "color") {
     const hex = (r?.project === "color" && r.colorName && supportedColors[r.colorName])
@@ -3281,6 +3306,7 @@ function updateLineNumbers(value) {
 
 function runChunk() {
   const step = currentLessonStep();
+  state.outputPhase = "running";
   const result = validateCurrentStep();
   if (!result.ok) {
     glitchConsecutiveFails += 1;
@@ -3307,6 +3333,8 @@ function runChunk() {
       rewardTimer = null;
     }
     state.showConceptLock = false;
+    state.outputPhase = "idle";
+    state.outputResult = null;
     state.log = result.message;
     if (glitchConsecutiveFails >= 2) {
       setGlitchState("frustrated");
@@ -3322,6 +3350,7 @@ function runChunk() {
   if (state.project === "clicker") runClickerForStep(step, result);
   if (state.project === "rps") runRpsForStep(step, result);
   applyAxisTrace(step);
+  state.outputPhase = "result";
   const message = result.message || step.runSuccess || "Output confirmed.";
   glitchConsecutiveFails = 0;
   state.stepStatus = {
