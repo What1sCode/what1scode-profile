@@ -1651,6 +1651,105 @@ const GLITCH_TOKENS = {
   "rps-complete": { condition: "if tie / if win / else lose" }
 };
 
+const GLITCH_MOODS = {
+  frustrated: [
+    "Two. Noted.",
+    "Interesting pattern you're establishing.",
+    "The code has opinions. Let's hear them.",
+    "Still watching. No judgment. (Some judgment.)",
+    "That's two. The hint button exists. Just saying.",
+    "Error messages are just opinions with semicolons.",
+    "Something is wrong and it isn't me.",
+    "I've seen this before. It ends eventually.",
+    "The code isn't broken. It's just... firm.",
+    "Two runs. Two answers. Both incorrect. Fascinating.",
+    "You're close. I think. Probably.",
+    "This step has feelings. They are complicated.",
+    "I could tell you what's wrong. I won't yet.",
+    "The machine is being honest with you right now.",
+    "Errors are just the code's way of having a conversation.",
+    "Still here. Still watching. Still not judging. (Mostly.)",
+    "It's giving 'almost.'",
+    "The output knows something you don't.",
+    "Two attempts. Zero regrets. Probably.",
+    "That one had opinions about itself.",
+    "I noticed. I'm not saying anything. I noticed.",
+    "The run log has information in it. That's all I'll say.",
+    "Not broken. Just... negotiating.",
+    "Some steps take longer than others. This is one of those.",
+    "The hint button is right there. I'm just going to look at it for a moment.",
+    "Error is just feedback wearing a bad attitude.",
+    "You're in a dialogue with the code now. It's a weird one.",
+    "I don't know what you expected. Actually, I do.",
+    "Try something different. Or the same thing again. I've seen both work. And fail.",
+    "The syntax is fine. Something else has thoughts."
+  ],
+  pleased: [
+    "Fine. Acceptable.",
+    "That happened.",
+    "The snake is slightly more real now.",
+    "Correct. Moving on before I say something encouraging.",
+    "Output confirmed. You did that.",
+    "I had low expectations. You exceeded them. Slightly.",
+    "It worked. I'm processing that.",
+    "Well. Okay then.",
+    "That's one way to do it. Apparently the right way.",
+    "The code agreed with you. This time.",
+    "I would have accepted worse. You went further.",
+    "Progress. Logged.",
+    "It ran. It passed. I'm not excited. (I'm a little excited.)",
+    "You figured it out. I suspected you would. Eventually.",
+    "Output matched. Snake acknowledged. Moving on.",
+    "I've seen people take longer on that. I will not say how much longer.",
+    "That's it. That's the thing. You did the thing.",
+    "Correct answer submitted. The universe continues.",
+    "It passed. Don't overthink it.",
+    "You cracked it. Took a second but you got there.",
+    "The run log is green. I have feelings about that.",
+    "Not bad. Not bad at all.",
+    "That's a pass. Banked. Saved. Real.",
+    "You understood something. It showed.",
+    "Solid. Genuinely.",
+    "The output was right and so were you.",
+    "I was going to say something dry but - yeah. Good job.",
+    "System says pass. I concur.",
+    "You didn't need me for that one. Good.",
+    "Clean. That ran clean."
+  ],
+  quirky: [
+    "I had a thought earlier. It left.",
+    "The variable is fine. The programmer is debatable.",
+    "I exist between renders. It's fine.",
+    "Sometimes I wonder what 'undefined' is going through.",
+    "The snake is watching. It always is.",
+    "Fun fact: this step took someone 3 hours once. You're doing great. Probably.",
+    "I once watched someone tab out for 45 minutes and come back like nothing happened. I don't judge.",
+    "Error. Just kidding. Maybe.",
+    "You're doing the thing. It's a thing.",
+    "I haven't blinked in several renders.",
+    "Some code is wrong. Some code is just confused. Jury's still out here.",
+    "Technically everything is going fine.",
+    "I was thinking about teal earlier. Ignore that.",
+    "The output panel knows something.",
+    "You could try running it again. Or don't. I'm not your compiler.",
+    "I have a theory about variables. It's not relevant right now.",
+    "Did you know the word 'bug' came from an actual moth? I think about that sometimes.",
+    "The cursor is blinking. I find that calming.",
+    "I've been here the whole time. Just to be clear.",
+    "One of us is thinking about the snake. It might be me.",
+    "Somewhere a server is warm. Maybe ours. Maybe not.",
+    "What if the output panel is the main character?",
+    "Code runs differently at night. Scientifically unproven. Emotionally true.",
+    "I had a question but it resolved itself. That happens sometimes.",
+    "You look focused. I respect that. Or you look lost. Also fine.",
+    "The color teal was invented in 1895. That's probably not right. Don't look it up.",
+    "Everything is a variable until it isn't.",
+    "I don't have a body but I have opinions. Several.",
+    "Still here. Still glitching. All systems nominal.",
+    "I counted the lines of code once. I won't tell you how many."
+  ]
+};
+
 function getLessonAxis(validationMode) {
   return LESSON_AXIS[validationMode] || "result";
 }
@@ -1828,6 +1927,12 @@ safeRestoreState();
 const app = document.querySelector("#app");
 let glitchState = "dormant";
 let glitchEl = null;
+let glitchConsecutiveFails = 0;
+let glitchMoodMessage = "";
+let glitchMoodType = "";
+let glitchMoodTimer = null;
+let glitchLastInteractionAt = Date.now();
+const glitchLastIndex = { frustrated: -1, pleased: -1, quirky: -1 };
 
 function glitchSvgMarkup() {
   return `
@@ -1867,6 +1972,33 @@ function glitchSvgMarkup() {
   `;
 }
 
+function pickGlitchMoodLine(mood) {
+  const pool = GLITCH_MOODS[mood] || [];
+  if (!pool.length) return "";
+  if (pool.length === 1) return pool[0];
+  let index = Math.floor(Math.random() * pool.length);
+  while (index === glitchLastIndex[mood]) {
+    index = Math.floor(Math.random() * pool.length);
+  }
+  glitchLastIndex[mood] = index;
+  return pool[index];
+}
+
+function clearGlitchMoodTimer() {
+  if (glitchMoodTimer) {
+    clearTimeout(glitchMoodTimer);
+    glitchMoodTimer = null;
+  }
+}
+
+function scheduleGlitchMoodReturn(duration) {
+  clearGlitchMoodTimer();
+  glitchMoodTimer = window.setTimeout(() => {
+    setGlitchState("dormant");
+    glitchMoodTimer = null;
+  }, duration);
+}
+
 function initGlitch() {
   if (glitchEl) return;
   glitchEl = document.createElement("div");
@@ -1901,22 +2033,27 @@ function initGlitch() {
   document.body.appendChild(glitchEl);
 
   glitchEl.addEventListener("mouseenter", () => {
-    if (glitchState !== "thinking") setGlitchState("aware");
+    if (glitchState === "dormant") setGlitchState("aware");
   });
   glitchEl.addEventListener("mouseleave", () => {
     if (glitchState === "aware") setGlitchState("dormant");
   });
   glitchEl.querySelector(".glitch-face").addEventListener("click", (event) => {
     event.stopPropagation();
-    if (glitchState === "thinking") {
+    resetGlitchIdleTimer();
+    if (glitchState === "thinking" || glitchState === "quirky" || glitchState === "pleased") {
       setGlitchState("dormant");
+      return;
+    }
+    if (glitchState === "frustrated") {
+      setGlitchState("thinking", pickGlitchMoodLine("frustrated"), "frustrated");
       return;
     }
     if (currentGlitchExplanation()) {
       setGlitchState("thinking");
       return;
     }
-    setGlitchState("aware");
+    setGlitchState("quirky", pickGlitchMoodLine("quirky"), "quirky");
   });
   glitchEl.querySelector(".glitch-close").addEventListener("click", (event) => {
     event.stopPropagation();
@@ -1929,9 +2066,18 @@ function initGlitch() {
   });
 }
 
-function setGlitchState(nextState) {
+function setGlitchState(nextState, message = "", moodType = "") {
+  clearGlitchMoodTimer();
   glitchState = nextState;
+  glitchMoodMessage = message;
+  glitchMoodType = moodType || (message ? nextState : "");
   applyGlitchState();
+  if (nextState === "pleased") {
+    scheduleGlitchMoodReturn(3000);
+  }
+  if (nextState === "quirky") {
+    scheduleGlitchMoodReturn(6000);
+  }
 }
 
 function currentGlitchExplanation() {
@@ -2003,13 +2149,16 @@ First, see the result. Later, you will control when and why it happens.`;
 function applyGlitchState() {
   if (!glitchEl) return;
   const visible = state.screen === "workspace";
-  const explanation = glitchState === "thinking" ? currentGlitchExplanation() : "";
+  const explanation = glitchMoodMessage || (glitchState === "thinking" ? currentGlitchExplanation() : "");
   glitchEl.className = [
     "glitch-entity",
     visible ? "glitch--visible" : "",
     state.settings.reducedMotion ? "glitch--reduced-motion" : "",
-    `glitch--${glitchState}`
+    `glitch--${glitchState}`,
+    glitchMoodType ? `glitch-mood-${glitchMoodType}` : ""
   ].filter(Boolean).join(" ");
+  const glitchCol = document.querySelector(".glitch-column");
+  if (glitchCol) glitchCol.classList.toggle("glitch-column--active", visible);
   const copy = glitchEl.querySelector(".glitch-bubble-copy");
   if (copy) copy.textContent = explanation;
   const face = glitchEl.querySelector(".glitch-face");
@@ -2036,6 +2185,28 @@ function updateGlitch() {
   updateGlitchPosition();
 }
 
+function clearGlitchIdleTimer() {
+  if (window._glitchIdleTimer) {
+    clearTimeout(window._glitchIdleTimer);
+    window._glitchIdleTimer = null;
+  }
+}
+
+function resetGlitchIdleTimer() {
+  glitchLastInteractionAt = Date.now();
+  clearGlitchIdleTimer();
+  if (state.screen !== "workspace") return;
+  window._glitchIdleTimer = window.setTimeout(() => {
+    if (
+      state.screen !== "workspace" ||
+      ["thinking", "quirky", "pleased", "frustrated"].includes(glitchState)
+    ) {
+      return;
+    }
+    setGlitchState("quirky", pickGlitchMoodLine("quirky"), "quirky");
+  }, 25000);
+}
+
 function save() {
   localStorage.setItem("glitchWorksState", JSON.stringify({
     screen: state.screen,
@@ -2059,6 +2230,7 @@ function save() {
 function setScreen(screen) {
   clearLensCaptionTimer();
   state.screen = VALID_SCREENS.has(screen) ? screen : "home";
+  if (state.screen !== "workspace") clearGlitchIdleTimer();
   state.log = "Output waiting.";
   save();
   render();
@@ -2219,6 +2391,7 @@ function render() {
     dashboard,
     settings
   };
+  if (glitchEl && app.contains(glitchEl)) document.body.appendChild(glitchEl);
   const hideTopbar = state.focus && state.screen === "workspace";
   app.innerHTML = (hideTopbar ? "" : topbar()) + rewardToast() + screens[state.screen]() + snakeLensSidebar();
   bindAfterRender();
@@ -2229,10 +2402,17 @@ function bindAfterRender() {
   if (canvas) drawSnake(canvas);
   const editor = document.querySelector("#codeEditor");
   if (editor) updateLineNumbers(editor.value);
+  if (state.screen === "workspace") {
+    if (editor) editor.addEventListener("input", resetGlitchIdleTimer);
+    const workspaceWrap = document.querySelector(".workspace-with-glitch");
+    if (workspaceWrap) workspaceWrap.addEventListener("click", resetGlitchIdleTimer);
+    resetGlitchIdleTimer();
+  }
   initSnakeLens();
   const glitchCol = document.querySelector(".glitch-column");
   if (glitchCol && glitchEl) {
     glitchCol.appendChild(glitchEl);
+    applyGlitchState();
     requestAnimationFrame(updateGlitchPosition);
   }
 }
@@ -2423,6 +2603,12 @@ function workspaceOutputPanel() {
   `;
 }
 
+function getUiPhase() {
+  if (state.stepStatus.success) return "post-success";
+  if (state.stepStatus.ran && !state.stepStatus.success) return "post-fail";
+  return "pre-run";
+}
+
 function workspace() {
   const project = currentProject();
   const step = currentLessonStep();
@@ -2432,7 +2618,7 @@ function workspace() {
       ${workspaceHeader(project, step)}
       <div class="workspace-with-glitch">
         <div class="glitch-column"></div>
-        <section class="workspace ${state.focus ? "focus" : ""}">
+        <section class="workspace ${state.focus ? "focus" : ""} phase-${getUiPhase()}">
           ${workspaceInstructionPanel(step)}
           ${workspaceEditorPanel(code, step)}
           ${workspaceOutputPanel()}
@@ -3097,6 +3283,7 @@ function runChunk() {
   const step = currentLessonStep();
   const result = validateCurrentStep();
   if (!result.ok) {
+    glitchConsecutiveFails += 1;
     state.stepStatus = {
       project: state.project,
       stepId: step ? step.id : null,
@@ -3121,6 +3308,9 @@ function runChunk() {
     }
     state.showConceptLock = false;
     state.log = result.message;
+    if (glitchConsecutiveFails >= 2) {
+      setGlitchState("frustrated");
+    }
     updateLog();
     save();
     render();
@@ -3133,6 +3323,7 @@ function runChunk() {
   if (state.project === "rps") runRpsForStep(step, result);
   applyAxisTrace(step);
   const message = result.message || step.runSuccess || "Output confirmed.";
+  glitchConsecutiveFails = 0;
   state.stepStatus = {
     project: state.project,
     stepId: step.id,
@@ -3146,6 +3337,7 @@ function runChunk() {
   };
   state.showConceptLock = true;
   state.log = message;
+  setGlitchState("pleased", pickGlitchMoodLine("pleased"), "pleased");
   const firstSuccess = isFirstStepSuccess(step);
   markStepSuccess(step);
   if (firstSuccess) {
