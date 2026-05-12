@@ -2022,7 +2022,15 @@ function applyGlitchState() {
 }
 
 function updateGlitchPosition() {
-  // position is now handled by CSS flex layout via #glitch-slot
+  if (!glitchEl) return;
+  const sidePanel = document.querySelector(".side-panel");
+  const slotEl = document.getElementById("glitch-slot");
+  if (!sidePanel || !slotEl) return;
+  const panelRect = sidePanel.getBoundingClientRect();
+  const slotRect = slotEl.getBoundingClientRect();
+  const panelCenter = panelRect.top + panelRect.height / 2 - slotRect.top;
+  const entityHeight = glitchEl.offsetHeight || 220;
+  glitchEl.style.marginTop = `${Math.max(0, panelCenter - entityHeight / 2)}px`;
 }
 
 function updateGlitch() {

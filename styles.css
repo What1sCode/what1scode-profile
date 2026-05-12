@@ -1310,7 +1310,6 @@ body.reduced-motion .snake-lens-sidebar {
   z-index: 30;
   display: none;
   justify-content: center;
-  padding-top: 50px;
 }
 
 .glitch-entity.glitch--visible {
