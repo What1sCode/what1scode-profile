@@ -1284,7 +1284,7 @@ body.reduced-motion .snake-lens-sidebar {
 
 .workspace-with-glitch {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0;
 }
 
@@ -1292,7 +1292,7 @@ body.reduced-motion .snake-lens-sidebar {
   flex-shrink: 0;
   width: 0;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   align-self: stretch;
 }

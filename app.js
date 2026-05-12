@@ -2020,7 +2020,15 @@ function applyGlitchState() {
 }
 
 function updateGlitchPosition() {
-  // centering handled by CSS flex on .workspace-with-glitch
+  if (!glitchEl) return;
+  const sidePanel = document.querySelector(".side-panel");
+  const glitchCol = document.querySelector(".glitch-column");
+  if (!sidePanel || !glitchCol) return;
+  const panelRect = sidePanel.getBoundingClientRect();
+  const colRect = glitchCol.getBoundingClientRect();
+  const panelCenter = panelRect.top + panelRect.height / 2 - colRect.top;
+  const entityHeight = glitchEl.offsetHeight || 220;
+  glitchEl.style.marginTop = `${Math.max(0, panelCenter - entityHeight / 2)}px`;
 }
 
 function updateGlitch() {
@@ -2223,7 +2231,10 @@ function bindAfterRender() {
   if (editor) updateLineNumbers(editor.value);
   initSnakeLens();
   const glitchCol = document.querySelector(".glitch-column");
-  if (glitchCol && glitchEl) glitchCol.appendChild(glitchEl);
+  if (glitchCol && glitchEl) {
+    glitchCol.appendChild(glitchEl);
+    requestAnimationFrame(updateGlitchPosition);
+  }
 }
 
 function home() {
