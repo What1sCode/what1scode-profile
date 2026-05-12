@@ -1318,7 +1318,7 @@ body.reduced-motion .snake-lens-sidebar {
   align-items: flex-start;
   justify-content: center;
   align-self: stretch;
-  overflow: hidden;
+  overflow: visible;
   transition: width 0.3s ease;
 }
 
@@ -1329,11 +1329,16 @@ body.reduced-motion .snake-lens-sidebar {
 .glitch-entity {
   position: relative;
   z-index: 30;
-  display: none;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
 }
 
 .glitch-entity.glitch--visible {
-  display: block;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
   transform: translateX(-20px);
 }
 
@@ -1562,27 +1567,31 @@ body.reduced-motion .snake-lens-sidebar {
 .glitch-bubble {
   display: none;
   position: absolute;
-  top: calc(100% - 18px);
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(390px, calc(100vw - 32px));
+  top: 55%;
+  right: calc(100% + 2px);
+  left: auto;
+  transform: translateY(-50%);
+  width: min(320px, 60vw);
   max-height: 240px;
-  overflow: visible;
+  overflow: hidden;
   border: 1px solid var(--line);
   background: rgba(17, 20, 27, 0.97);
   color: var(--text);
-  padding: 16px 38px 16px 16px;
+  padding: 16px 16px 16px 16px;
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.36);
+  border-radius: 6px;
+  z-index: 100;
 }
 
 .glitch-bubble::before {
   content: "";
   position: absolute;
-  top: -13px;
-  left: calc(50% - 18px);
+  top: calc(50% - 12px);
+  right: -13px;
+  left: auto;
   width: 24px;
   height: 24px;
-  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
   border-top: 1px solid var(--line);
   background: rgba(17, 20, 27, 0.97);
   transform: rotate(45deg);
