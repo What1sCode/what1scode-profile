@@ -3018,7 +3018,7 @@ function systemCapabilityPanel(step) {
 function snakeLensSidebar() {
   const step = currentLessonStep();
   const lens = step?.snakeLens;
-  if (!state.stepStatus.success || !lens) {
+  if (state.screen !== "workspace" || !state.stepStatus.success || !lens) {
     return "";
   }
   const axis = getLessonAxis(step.validationMode);
