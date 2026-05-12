@@ -1309,7 +1309,7 @@ body.reduced-motion .snake-lens-sidebar {
 
 .glitch-entity.glitch--visible {
   display: block;
-  transform: translateX(-12px);
+  transform: translateX(-20px);
 }
 
 .glitch-face {
