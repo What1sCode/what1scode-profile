@@ -1282,35 +1282,33 @@ body.reduced-motion .snake-lens-sidebar {
   color: var(--text);
 }
 
-.page-layout {
+.workspace-with-glitch {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
+  gap: 0;
 }
 
-#glitch-slot {
+.glitch-column {
   flex-shrink: 0;
   width: 0;
-  transition: width 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
 }
 
-#glitch-slot.glitch-slot--active {
+.glitch-column:has(.glitch--visible) {
   width: clamp(190px, 14vw, 270px);
-}
-
-.app-shell {
-  flex: 1;
-  min-width: 0;
 }
 
 .glitch-entity {
   position: relative;
   z-index: 30;
   display: none;
-  justify-content: center;
 }
 
 .glitch-entity.glitch--visible {
-  display: flex;
+  display: block;
 }
 
 .glitch-face {

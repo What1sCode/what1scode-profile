@@ -1898,7 +1898,7 @@ function initGlitch() {
       <div class="glitch-bubble-copy"></div>
     </section>
   `;
-  (document.getElementById("glitch-slot") || document.body).appendChild(glitchEl);
+  document.body.appendChild(glitchEl);
 
   glitchEl.addEventListener("mouseenter", () => {
     if (glitchState !== "thinking") setGlitchState("aware");
@@ -2010,8 +2010,6 @@ function applyGlitchState() {
     state.settings.reducedMotion ? "glitch--reduced-motion" : "",
     `glitch--${glitchState}`
   ].filter(Boolean).join(" ");
-  const slot = document.getElementById("glitch-slot");
-  if (slot) slot.classList.toggle("glitch-slot--active", visible);
   const copy = glitchEl.querySelector(".glitch-bubble-copy");
   if (copy) copy.textContent = explanation;
   const face = glitchEl.querySelector(".glitch-face");
@@ -2022,17 +2020,7 @@ function applyGlitchState() {
 }
 
 function updateGlitchPosition() {
-  if (!glitchEl) return;
-  requestAnimationFrame(() => {
-    const sidePanel = document.querySelector(".side-panel");
-    const slotEl = document.getElementById("glitch-slot");
-    if (!sidePanel || !slotEl) return;
-    const panelRect = sidePanel.getBoundingClientRect();
-    const slotRect = slotEl.getBoundingClientRect();
-    const panelCenter = panelRect.top + panelRect.height / 2 - slotRect.top;
-    const entityHeight = glitchEl.offsetHeight || 220;
-    glitchEl.style.marginTop = `${Math.max(0, panelCenter - entityHeight / 2)}px`;
-  });
+  // centering handled by CSS flex on .workspace-with-glitch
 }
 
 function updateGlitch() {
@@ -2224,9 +2212,7 @@ function render() {
     settings
   };
   const hideTopbar = state.focus && state.screen === "workspace";
-  const topbarMount = document.getElementById("topbar-mount");
-  if (topbarMount) topbarMount.innerHTML = hideTopbar ? "" : topbar();
-  app.innerHTML = rewardToast() + screens[state.screen]() + snakeLensSidebar();
+  app.innerHTML = (hideTopbar ? "" : topbar()) + rewardToast() + screens[state.screen]() + snakeLensSidebar();
   bindAfterRender();
 }
 
@@ -2236,6 +2222,8 @@ function bindAfterRender() {
   const editor = document.querySelector("#codeEditor");
   if (editor) updateLineNumbers(editor.value);
   initSnakeLens();
+  const glitchCol = document.querySelector(".glitch-column");
+  if (glitchCol && glitchEl) glitchCol.appendChild(glitchEl);
 }
 
 function home() {
@@ -2431,11 +2419,14 @@ function workspace() {
   return `
     <main class="screen">
       ${workspaceHeader(project, step)}
-      <section class="workspace ${state.focus ? "focus" : ""}">
-        ${workspaceInstructionPanel(step)}
-        ${workspaceEditorPanel(code, step)}
-        ${workspaceOutputPanel()}
-      </section>
+      <div class="workspace-with-glitch">
+        <div class="glitch-column"></div>
+        <section class="workspace ${state.focus ? "focus" : ""}">
+          ${workspaceInstructionPanel(step)}
+          ${workspaceEditorPanel(code, step)}
+          ${workspaceOutputPanel()}
+        </section>
+      </div>
     </main>
   `;
 }
