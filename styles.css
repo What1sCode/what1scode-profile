@@ -57,12 +57,13 @@ button {
   cursor: pointer;
 }
 
-button:focus-visible,
-textarea:focus-visible,
-input:focus-visible,
-select:focus-visible {
+:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
 }
 
 .app-shell {
@@ -430,10 +431,37 @@ h3 {
   display: none;
 }
 
+.workspace.phase-pre-run .concept-lock,
+.workspace.phase-pre-run #runLog,
+.workspace.phase-pre-run .output-trace,
+.workspace.phase-pre-run .prediction-feedback {
+  display: none;
+}
+
+.workspace.phase-post-fail .prediction,
+.workspace.phase-post-fail .concept-lock {
+  display: none;
+}
+
+.workspace.phase-post-success .prediction,
+.workspace.phase-post-success #runLog,
+.workspace.phase-post-success .output-trace {
+  display: none;
+}
+
+.workspace.phase-post-fail .output-panel,
+.workspace.phase-post-success .concept-lock {
+  animation: fadeInUp 0.3s ease;
+}
+
+.workspace.phase-post-success .concept-lock {
+  animation-delay: 400ms;
+  animation-fill-mode: both;
+}
+
 .panel {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(17, 20, 27, 0.9);
   padding: 16px;
 }
 
@@ -815,11 +843,6 @@ body.reduced-motion *::after {
 .prediction-choice.selected {
   border-color: var(--accent);
   background: rgba(0, 200, 160, 0.10);
-}
-
-.prediction-choice:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
 }
 
 .concept-lock {
@@ -1295,9 +1318,11 @@ body.reduced-motion .snake-lens-sidebar {
   align-items: flex-start;
   justify-content: center;
   align-self: stretch;
+  overflow: hidden;
+  transition: width 0.3s ease;
 }
 
-.glitch-column:has(.glitch--visible) {
+.glitch-column.glitch-column--active {
   width: clamp(190px, 14vw, 270px);
 }
 
@@ -1332,9 +1357,20 @@ body.reduced-motion .snake-lens-sidebar {
 }
 
 .glitch--aware .glitch-face,
-.glitch--thinking .glitch-face {
+.glitch--thinking .glitch-face,
+.glitch--quirky .glitch-face,
+.glitch--pleased .glitch-face {
   opacity: 1;
   filter: none;
+}
+
+.glitch--frustrated .glitch-face {
+  opacity: 0.82;
+  filter: saturate(1.25) contrast(1.12);
+}
+
+.glitch--pleased .glitch-face {
+  animation: glitchPleasedGlow 3000ms ease 1;
 }
 
 .glitch-avatar-stack {
@@ -1376,13 +1412,22 @@ body.reduced-motion .snake-lens-sidebar {
 }
 
 .glitch--aware .glitch-avatar-cyan,
-.glitch--aware .glitch-avatar-pink {
+.glitch--aware .glitch-avatar-pink,
+.glitch--quirky .glitch-avatar-cyan,
+.glitch--quirky .glitch-avatar-pink {
   opacity: 0.18;
 }
 
 .glitch--thinking .glitch-avatar-cyan,
-.glitch--thinking .glitch-avatar-pink {
+.glitch--thinking .glitch-avatar-pink,
+.glitch--frustrated .glitch-avatar-cyan,
+.glitch--frustrated .glitch-avatar-pink {
   opacity: 0.34;
+}
+
+.glitch--pleased .glitch-avatar-cyan,
+.glitch--pleased .glitch-avatar-pink {
+  opacity: 0.12;
 }
 
 .glitch--thinking .glitch-avatar-stack {
@@ -1420,14 +1465,19 @@ body.reduced-motion .snake-lens-sidebar {
 .glitch-particles span:nth-child(12) { top: 72%; left: 11%; animation-delay: 4300ms; }
 
 .glitch--aware .glitch-particles span,
-.glitch--thinking .glitch-particles span {
+.glitch--thinking .glitch-particles span,
+.glitch--frustrated .glitch-particles span,
+.glitch--pleased .glitch-particles span,
+.glitch--quirky .glitch-particles span {
   --particle-opacity: 0.72;
   animation-duration: 1150ms;
   box-shadow: 0 0 16px rgba(0, 200, 160, 0.7);
 }
 
 .glitch--aware .glitch-particles span:nth-child(n + 7),
-.glitch--thinking .glitch-particles span:nth-child(n + 7) {
+.glitch--thinking .glitch-particles span:nth-child(n + 7),
+.glitch--frustrated .glitch-particles span:nth-child(n + 7),
+.glitch--quirky .glitch-particles span:nth-child(n + 7) {
   background: #FF2D78;
   box-shadow: 0 0 18px rgba(255, 45, 120, 0.46);
 }
@@ -1538,8 +1588,23 @@ body.reduced-motion .snake-lens-sidebar {
   transform: rotate(45deg);
 }
 
-.glitch--thinking .glitch-bubble {
+.glitch--thinking .glitch-bubble,
+.glitch--pleased .glitch-bubble,
+.glitch--quirky .glitch-bubble {
   display: block;
+}
+
+.glitch-mood-frustrated .glitch-bubble {
+  border-color: rgba(255, 107, 53, 0.48);
+  background: rgba(28, 18, 20, 0.97);
+}
+
+.glitch-mood-pleased .glitch-bubble {
+  border-color: rgba(61, 214, 140, 0.38);
+}
+
+.glitch-mood-quirky .glitch-bubble {
+  border-color: rgba(0, 200, 160, 0.46);
 }
 
 .glitch-close {
@@ -1582,10 +1647,21 @@ body.reduced-motion .snake-lens-sidebar {
   100% { clip-path: inset(0 0 0 0); transform: translateX(0); }
 }
 
+@keyframes glitchPleasedGlow {
+  0% { filter: drop-shadow(0 0 0 rgba(61, 214, 140, 0)); }
+  20% { filter: drop-shadow(0 0 18px rgba(61, 214, 140, 0.38)); }
+  100% { filter: drop-shadow(0 0 0 rgba(61, 214, 140, 0)); }
+}
+
 @keyframes glitchParticleIdle {
   0%, 62%, 100% { opacity: 0; transform: translate(0, 0) scale(0.7); }
   66% { opacity: var(--particle-opacity); transform: translate(3px, -2px) scale(1); }
   70% { opacity: 0; transform: translate(-2px, 1px) scale(0.8); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 body.reduced-motion .glitch--thinking .glitch-fragments,
@@ -1606,6 +1682,11 @@ body.reduced-motion .glitch--thinking .glitch-fragments rect,
 
 body.reduced-motion .glitch--thinking .glitch-avatar-stack,
 .glitch--reduced-motion.glitch--thinking .glitch-avatar-stack {
+  animation: none;
+}
+
+body.reduced-motion .glitch--pleased .glitch-face,
+.glitch--reduced-motion.glitch--pleased .glitch-face {
   animation: none;
 }
 
