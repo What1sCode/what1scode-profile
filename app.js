@@ -1822,6 +1822,7 @@ const state = {
   },
   outputPhase: "idle",
   outputResult: null,
+  snakeLensVisible: false,
   lastSuccessfulRun: {
     project: null,
     stepId: null
@@ -2280,6 +2281,7 @@ function resetStepInteractionState() {
   };
   state.outputPhase = "idle";
   state.outputResult = null;
+  state.snakeLensVisible = false;
 }
 
 function progressPercent() {
@@ -2386,6 +2388,7 @@ function render() {
     settings
   };
   if (glitchEl && app.contains(glitchEl)) document.body.appendChild(glitchEl);
+  document.body.setAttribute("data-screen", state.screen);
   const hideTopbar = state.focus && state.screen === "workspace";
   app.innerHTML = (hideTopbar ? "" : topbar()) + rewardToast() + screens[state.screen]() + snakeLensSidebar();
   bindAfterRender();
@@ -2527,7 +2530,7 @@ function workspaceHeader(project, step) {
   return `
     <div class="section-heading">
       <div>
-        <p class="eyebrow">${escapeHtml(project.title)} / ${escapeHtml(step.stepLabel)}</p>
+        <p class="eyebrow">${escapeHtml(project.title)}</p>
         <h2>${escapeHtml(step.title)}</h2>
       </div>
       <div class="cta-row">
@@ -2539,13 +2542,16 @@ function workspaceHeader(project, step) {
 }
 
 function workspaceInstructionPanel(step) {
+  const phase = getUiPhase();
   return `
     <aside class="panel side-panel">
       <h3>Current Goal</h3>
       <p>${highlightTerms(step.goal, step.focusTerms || [])}</p>
       <p>${highlightTerms(step.instruction, step.focusTerms || [])}</p>
-      <h3>Concept Reminder</h3>
-      <p>${highlightTerms(step.conceptLock, step.focusTerms || [])}</p>
+      ${phase === "post-success" ? `
+        <h3>What happened</h3>
+        <p>${highlightTerms(step.conceptLock, step.focusTerms || [])}</p>
+      ` : ""}
       ${lessonStepper()}
     </aside>
   `;
@@ -2569,7 +2575,10 @@ function workspaceEditorPanel(code, step) {
       ${step.prediction ? predictionPrompt() : ""}
       ${predictionFeedbackPanel()}
       <div class="workspace-actions">
-        <button type="button" class="secondary" onclick="showHint()">Hint</button>
+        <div class="action-left">
+          <button type="button" class="secondary" onclick="showHint()">Hint</button>
+          <span class="step-counter-label">${escapeHtml(step.stepLabel)}</span>
+        </div>
         <div class="cta-row">
           <button type="button" class="secondary" onclick="previousStep()">Back</button>
           ${button({
@@ -3012,7 +3021,7 @@ function systemCapabilityPanel(step) {
 function snakeLensSidebar() {
   const step = currentLessonStep();
   const lens = step?.snakeLens;
-  if (state.screen !== "workspace" || !state.stepStatus.success || !lens) {
+  if (state.screen !== "workspace" || !state.stepStatus.success || !lens || !state.snakeLensVisible) {
     return "";
   }
   const axis = getLessonAxis(step.validationMode);
@@ -3366,6 +3375,12 @@ function runChunk() {
   updateLog();
   save();
   render();
+  setTimeout(() => {
+    if (state.stepStatus.success) {
+      state.snakeLensVisible = true;
+      render();
+    }
+  }, 1600);
 }
 
 function runDice() {
